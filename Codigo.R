@@ -7,7 +7,8 @@ colnames(datos) = c("cap_diameter","cap_shape", "gill_attachment", "gill_color",
 datos %>% mutate(cap_shape = as.factor(cap_shape), 
                  gill_attachment = as.factor(gill_attachment),
                  gill_color = as.factor(gill_color),
-                 stem_color = as.factor(stem_color))
+                 stem_color = as.factor(stem_color),
+                 season = as.factor(season))
 
 
 str(datos)
@@ -15,11 +16,11 @@ unique(datos$cap_shape)
 unique(datos$cap_shape)
 unique(datos$gill_attachment)
 unique(datos$gill_color)
-unique(datos$stem_color)
+unique(datos$season)
 summary(datos)
 
-puntaje = matrix(0, ncol = 2, nrow = 100)
-
+puntaje = as.data.frame(matrix(0, ncol = 2, nrow = 100))
+colnames(puntaje) = c("Puntaje", "Semilla")
 for (i in 1:100) {
   
 set.seed(i)  
@@ -77,7 +78,7 @@ if(pchisq(modelo7$null.deviance-modelo7$deviance,length(unique(datos_sample$stem
 
 modelo8 <- glm(class ~ season, family=binomial(link="logit"), data = datos_sample) 
 
-if(pchisq(modelo8$null.deviance-modelo8$deviance,1)>.95){
+if(pchisq(modelo8$null.deviance-modelo8$deviance,length(unique(datos_sample$stem_color))-1)>.95){
   puntaje[i,1] = puntaje[i,1] + 1
 }
 
@@ -89,6 +90,7 @@ semilla = i
 
 
 puntaje
+
 
 
 
