@@ -19,8 +19,10 @@ unique(datos$gill_color)
 unique(datos$season)
 summary(datos)
 
-puntaje = as.data.frame(matrix(0, ncol = 2, nrow = 100))
-colnames(puntaje) = c("Puntaje", "Semilla")
+puntaje = as.data.frame(matrix(0, ncol = 3, nrow = 100))
+colnames(puntaje) = c("Puntaje", "Semilla", "Variables")
+puntaje$Variables = ""
+
 for (i in 1:100) {
   
 set.seed(i)  
@@ -33,18 +35,21 @@ modelo1 <- glm(class ~ cap_diameter, family=binomial(link="logit"), data = datos
 
 if(pchisq(modelo1$null.deviance-modelo1$deviance,1)>.95){
   puntaje[i,1] = puntaje[i,1] + 1
+  puntaje[i,3] = paste(puntaje[i,3],"1")
 }
 
 modelo2 <- glm(class ~ cap_shape, family=binomial(link="logit"), data = datos_sample) 
 
 if(pchisq(modelo2$null.deviance-modelo2$deviance,length(unique(datos_sample$cap_shape))-1)>.95){
   puntaje[i,1] = puntaje[i,1] + 1
+  puntaje[i,3] = paste(puntaje[i,3],"2")
 }
 
 modelo3 <- glm(class ~ gill_attachment, family=binomial(link="logit"), data = datos_sample) 
 
 if(pchisq(modelo3$null.deviance-modelo3$deviance,length(unique(datos_sample$gill_attachment))-1)>.95){
   puntaje[i,1] = puntaje[i,1] + 1
+  puntaje[i,3] = paste(puntaje[i,3],"3")
 }
 
 
@@ -53,6 +58,7 @@ modelo4 <- glm(class ~ gill_color, family=binomial(link="logit"), data = datos_s
 
 if(pchisq(modelo4$null.deviance-modelo4$deviance,length(unique(datos_sample$gill_color))-1)>.95){
   puntaje[i,1] = puntaje[i,1] + 1
+  puntaje[i,3] = paste(puntaje[i,3],"4")
 }
 
 
@@ -61,18 +67,21 @@ modelo5 <- glm(class ~ stem_height, family=binomial(link="logit"), data = datos_
 
 if(pchisq(modelo5$null.deviance-modelo5$deviance,1)>.95){
   puntaje[i,1] = puntaje[i,1] + 1
+  puntaje[i,3] = paste(puntaje[i,3],"5")
 }
 
 modelo6 <- glm(class ~ stem_width, family=binomial(link="logit"), data = datos_sample) 
 
 if(pchisq(modelo6$null.deviance-modelo6$deviance,1)>.95){
   puntaje[i,1] = puntaje[i,1] + 1
+  puntaje[i,3] = paste(puntaje[i,3],"6")
 }
 
 modelo7 <- glm(class ~ stem_color, family=binomial(link="logit"), data = datos_sample) 
 
 if(pchisq(modelo7$null.deviance-modelo7$deviance,length(unique(datos_sample$stem_color))-1)>.95){
   puntaje[i,1] = puntaje[i,1] + 1
+  puntaje[i,3] = paste(puntaje[i,3],"7")
 }
 
 
@@ -80,6 +89,7 @@ modelo8 <- glm(class ~ season, family=binomial(link="logit"), data = datos_sampl
 
 if(pchisq(modelo8$null.deviance-modelo8$deviance,length(unique(datos_sample$stem_color))-1)>.95){
   puntaje[i,1] = puntaje[i,1] + 1
+  puntaje[i,3] = paste(puntaje[i,3],"8")
 }
 
 semilla = i
