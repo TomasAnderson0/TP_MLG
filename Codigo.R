@@ -164,40 +164,10 @@ modelo9 <- glm(class ~ cap_diameter + stem_color + season, family = binomial,
 
 
 comparacion <- data.frame(
-  residual_d = c(modelo1$deviance, modelo2$deviance, modelo3$deviance,
-               modelo4$deviance, modelo5$deviance, modelo6$deviance,
-               modelo7$deviance, modelo8$deviance, modelo9$deviance),
-  df = c(modelo1$df.residual, modelo2$df.residual, modelo3$df.residual, 
-         modelo4$df.residual, modelo5$df.residual, modelo6$df.residual,
-         modelo7$df.residual, modelo8$df.residual, modelo9$df.residual)
+  akaike = c(AIC(modelo1), AIC(modelo2), AIC(modelo3), AIC(modelo4), AIC(modelo5), 
+            AIC(modelo6), AIC(modelo7), AIC(modelo8), AIC(modelo9)),
+  modelo = rep(1:9, 1)
 )
 
-
-combinaciones <- combn(1:9, 2)
-
-resultados <- data.frame(
-  dif_deviance = numeric(ncol(combinaciones)),
-  dif_df = numeric(ncol(combinaciones)),
-  prob_asoc = numeric(ncol(combinaciones)),
-  modelos = character(ncol(combinaciones))
-)
-
-
-for (k in 1:ncol(combinaciones)) {
-  i <- combinaciones[1, k]
-  j <- combinaciones[2, k]
-  
-  
-  resultados$dif_deviance[k] <- comparacion$residual_d[i] - comparacion$residual_d[j]
-  resultados$dif_df[k] <- abs(comparacion$df[i] - comparacion$df[j])
-  resultados$prob_asoc[k] <- pchisq(resultados$dif_deviance[k], resultados$dif_df[k], lower.tail = FALSE)
-  resultados$modelos[k] <- paste0(i, "-", j)
-}
-
-
-
-mejores <- resultados %>% 
-  filter(prob_asoc <= 0.06)
-# Los modelos 8 y 9 quedan descartados porque ajustan practicamente lo mismo y 
-# no son mejores que ningúno de los otros 7.
-
+# Los modelos con AIC más chicos son el 4 y el 6 con 305.66 y 307.17 respectivamente
+# mientras que el modelo 7 ya salta con un AIC de 329.
