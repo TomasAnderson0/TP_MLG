@@ -23,6 +23,25 @@ hongos %>% mutate(cap_shape = as.factor(cap_shape),
                  stem_color = as.factor(stem_color),
                  season = as.factor(season))
 
+## Recategorizacion
+
+hongos = hongos %>% mutate(gill_color = case_when(gill_color == "e" | gill_color == "y" | gill_color == "o" | gill_color == "p" ~ "Calidos",
+                                                  gill_color == "u" | gill_color == "f" | gill_color == "r" ~ "Frios",
+                                                  gill_color == "w" | gill_color == "g" | gill_color == "b" ~ "Claros",
+                                                  gill_color == "n" | gill_color == "k" ~ "Oscuros"),
+                           gill_attachment = case_when(gill_attachment == "a" | gill_attachment == "x"~ "Adjuntas",
+                                                       gill_attachment == "s" | gill_attachment == "p" | gill_attachment == "u" ~ "Otros",
+                                                       gill_attachment == "e"  ~ "Libre",
+                                                       gill_attachment == "f" ~ "None",
+                                                       gill_attachment == "d"~ "No se donde va esta"))
+
+
+
+
+
+
+
+
 
 unico1 = length(unique(hongos$cap_shape))
 
