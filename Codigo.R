@@ -212,96 +212,96 @@ pchisq(comp10$Deviance[2],comp10$Df[2],lower.tail = F)
 #Añadimos cap_shape
 
 
+# Vemos si las que ya estaban siguen siendo significativas
 
-modelo13 = glm(class ~  stem_color + season + cap_shape + cap_diameter, family = binomial(link="logit"),
+modelo13 = glm(class ~  stem_color + cap_shape, family = binomial(link="logit"),
               data = datos_sample)
 
-modelo14 = glm(class ~  stem_color + season + cap_shape + gill_attachment, family = binomial(link="logit"),
+modelo14 = glm(class ~   season + cap_shape, family = binomial(link="logit"),
                data = datos_sample)
 
-modelo15 = glm(class ~  stem_color + season + cap_shape + gill_color, family = binomial(link="logit"),
+
+comp11 = anova(modelo13, modelo9)
+comp12 = anova(modelo14, modelo9)
+pchisq(comp11$Deviance[2],comp11$Df[2],lower.tail = F)
+pchisq(comp12$Deviance[2],comp12$Df[2],lower.tail = F)
+
+# Siguen siendo signoficativas, proseguimos agregando variables
+
+modelo15 = glm(class ~  stem_color + season + cap_shape + cap_diameter, family = binomial(link="logit"),
                data = datos_sample)
 
-modelo16 = glm(class ~  stem_color + season + cap_shape + stem_height, family = binomial(link="logit"),
+modelo16 = glm(class ~  stem_color + season + cap_shape + gill_attachment, family = binomial(link="logit"),
                data = datos_sample)
 
-modelo17 = glm(class ~  stem_color + season + cap_shape + stem_width, family = binomial(link="logit"),
+modelo17 = glm(class ~ stem_color + season + cap_shape + gill_color, family = binomial(link = "logit"),
                data = datos_sample)
 
-comp11 = anova(modelo9,modelo13)
-comp12 = anova(modelo9,modelo14)
+modelo18 = glm(class ~  stem_color + season + cap_shape + stem_height, family = binomial(link="logit"),
+               data = datos_sample)
+
+modelo19 = glm(class ~  stem_color + season + cap_shape + stem_width, family = binomial(link="logit"),
+               data = datos_sample)
+
 comp13 = anova(modelo9,modelo15)
 comp14 = anova(modelo9,modelo16)
 comp15 = anova(modelo9,modelo17)
-pchisq(comp11$Deviance[2],comp11$Df[2],lower.tail = F)
-pchisq(comp12$Deviance[2],comp12$Df[2],lower.tail = F)
+comp16 = anova(modelo9,modelo18)
+comp17 = anova(modelo9,modelo19)
 pchisq(comp13$Deviance[2],comp13$Df[2],lower.tail = F)
 pchisq(comp14$Deviance[2],comp14$Df[2],lower.tail = F)
 pchisq(comp15$Deviance[2],comp15$Df[2],lower.tail = F)
+pchisq(comp16$Deviance[2],comp16$Df[2],lower.tail = F)
+pchisq(comp17$Deviance[2],comp17$Df[2],lower.tail = F)
 
 
 #Añadimos gill_attachment
 
-modelo18 = glm(class ~  stem_color + season + cap_shape + gill_attachment + cap_diameter, family = binomial(link="logit"),
+# Verificamos, otra vez, que las que ya están sean aún significativas
+
+modelo20 = glm(class ~  season + cap_shape + gill_attachment, family = binomial(link="logit"),
                data = datos_sample)
 
-modelo19 = glm(class ~  stem_color + season + cap_shape + gill_attachment + gill_color, family = binomial(link="logit"),
+modelo21 = glm(class ~  stem_color + season + gill_attachment, family = binomial(link="logit"),
                data = datos_sample)
 
-modelo20 = glm(class ~  stem_color + season + cap_shape + gill_attachment + stem_height, family = binomial(link="logit"),
+modelo22 = glm(class ~ stem_color + cap_shape + gill_attachment, family = binomial(link = "logit"),
                data = datos_sample)
 
-modelo21 = glm(class ~  stem_color + season + cap_shape + gill_attachment + stem_width, family = binomial(link="logit"),
-               data = datos_sample)
 
-comp16 = anova(modelo14,modelo18)
-comp17 = anova(modelo14,modelo19)
-comp18 = anova(modelo14,modelo20)
-comp19 = anova(modelo14,modelo21)
-pchisq(comp16$Deviance[2],comp16$Df[2],lower.tail = F)
-pchisq(comp17$Deviance[2],comp17$Df[2],lower.tail = F)
+comp18 = anova(modelo20, modelo16)
+comp19 = anova(modelo21, modelo16)
+comp20 = anova(modelo22, modelo16)
 pchisq(comp18$Deviance[2],comp18$Df[2],lower.tail = F)
 pchisq(comp19$Deviance[2],comp19$Df[2],lower.tail = F)
+pchisq(comp20$Deviance[2],comp20$Df[2],lower.tail = F)
+
+# Todas siguen siendo signficativas, probamos agregando más.
+
+modelo23 = glm(class ~  stem_color + season + cap_shape + gill_attachment + cap_diameter, family = binomial(link="logit"),
+               data = datos_sample)
+
+modelo24 = glm(class ~  stem_color + season + cap_shape + gill_attachment + gill_color, family = binomial(link="logit"),
+               data = datos_sample)
+
+modelo25 = glm(class ~  stem_color + season + cap_shape + gill_attachment + stem_height, family = binomial(link="logit"),
+               data = datos_sample)
+
+modelo26 = glm(class ~  stem_color + season + cap_shape + gill_attachment + stem_width, family = binomial(link="logit"),
+               data = datos_sample)
+
+comp21 = anova(modelo16,modelo23)
+comp22 = anova(modelo16,modelo24)
+comp23 = anova(modelo16,modelo25)
+comp24 = anova(modelo16,modelo26)
+pchisq(comp21$Deviance[2],comp21$Df[2],lower.tail = F)
+pchisq(comp22$Deviance[2],comp22$Df[2],lower.tail = F)
+pchisq(comp23$Deviance[2],comp23$Df[2],lower.tail = F)
+pchisq(comp24$Deviance[2],comp24$Df[2],lower.tail = F)
 
 
-#Nos quedamos con el modelo14
+#Nos quedamos con el modelo16
 
-#TO DO interacciones
+# Las interacciones no se pueden hacer porque no están todos los cruces de 
+# catgorías.
 
-
-
-
-
-# modelo2 <- glm(class ~ cap_shape + stem_color + season, family = binomial,
-#                data = datos_sample)
-# 
-# modelo3 <- glm(class ~ cap_diameter + stem_width + stem_color, family = binomial,
-#                data = datos_sample)
-# 
-# modelo4 <- glm(class ~ gill_attachment + stem_width + stem_color, family = binomial,
-#                data = datos_sample)
-# 
-# modelo5 <- glm(class ~ gill_color + stem_color + season, family = binomial,
-#                data = datos_sample)
-# 
-# modelo6 <- glm(class ~ gill_attachment + gill_color + stem_color, family = binomial,
-#                data = datos_sample)
-# 
-# modelo7 <- glm(class ~ cap_diameter + cap_shape + stem_color, family = binomial,
-#                data = datos_sample)
-# 
-# modelo8 <- glm(class ~ gill_color + stem_width + season, family = binomial,
-#                data = datos_sample)
-# 
-# modelo9 <- glm(class ~ cap_diameter + stem_color + season, family = binomial,
-#                data = datos_sample)
-# 
-# 
-# comparacion <- data.frame(
-#   akaike = c(AIC(modelo1), AIC(modelo2), AIC(modelo3), AIC(modelo4), AIC(modelo5), 
-#             AIC(modelo6), AIC(modelo7), AIC(modelo8), AIC(modelo9)),
-#   modelo = rep(1:9, 1)
-# )
-
-# Los modelos con AIC más chicos son el 4 y el 6 con 305.66 y 307.17 respectivamente
-# mientras que el modelo 7 ya salta con un AIC de 329.
