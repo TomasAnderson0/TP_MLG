@@ -1,6 +1,7 @@
 # ---Librerias---
 library(readr)
 library(tidyverse)
+library(ggplot2)
 
 
 # ---Datos---
@@ -53,7 +54,6 @@ unico3 = length(unique(hongos$gill_color))
 unico4 = length(unique(hongos$stem_color))
 
 unico5 = length(unique(hongos$season))
-
 
 
 # ---Selección de variables---
@@ -332,13 +332,35 @@ pchisq(comp24$Deviance[2],comp24$Df[2],lower.tail = F)
 set.seed(205)  
 
 datos_sample = hongos[sample(61069,250),]
+ 
+# Análisis descriptivo
+
+ggplot(datos_sample) + 
+  aes(x = factor(class), fill = factor(class)) + 
+  geom_bar() +
+  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
+  scale_x_discrete(name = "Hongo", labels = c("Venenoso", "Comestible")) +
+  scale_y_continuous(breaks = seq(0, 150, 25)) +
+  labs(y = "Frecuencia", title = "Gráfico 1: Cantidad de hongos según categoría") +
+  theme_bw()
+
+ggplot(datos_sample) +
+  aes(x = cap_shape, fill = factor(class)) +
+  geom_bar(position = "dodge") +
+  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
+  scale_x_discrete(name = "Sombrero", guide = c("b = campana", "c = cónico")) +
+  labs(y = "Frecuencia", 
+       title = "Gráfico 2; Cantidad de hongos según la forma del sombrero") +
+  theme_bw()
+  
+
 
 #Modelo inical
 
 modelo1 <- glm(class ~ cap_diameter + cap_shape + gill_attachment + gill_color, family = binomial(link="logit"),
                data = datos_sample)
 
-modelo2 = glm(class ~  cap_shape , family = binomial(link="logit"),
+modelo2 = glm(class ~  cap_shape  , family = binomial(link="logit"),
               data = datos_sample)
 
 modelo3 = glm(class ~  gill_attachment , family = binomial(link="logit"),
@@ -377,3 +399,66 @@ comp4 = anova(modelo2, modelo7)
 pchisq(comp4$Deviance[2],comp4$Df[2],lower.tail = F)
 
 
+# Agrupamos los datos
+datos_agrup <- datos_sample %>% 
+  select(cap_shape, class) %>%
+  group_by(cap_shape) %>% 
+  summarise(n = n(), y = sum(class) ) 
+
+
+# Vemos cuál enlace es mejor:
+
+mod_logit <- glm(y/n ~ cap_shape, family = binomial(link = "logit"),
+                 weights = n, data = datos_agrup)
+summary(mod_logit)
+mod_probit <- glm(y/n ~ cap_shape, family = binomial(link = "probit"),
+                  weights = n,data = datos_agrup)
+summary(mod_probit)
+mod_cll <- glm(y/n ~ cap_shape, family = binomial(link = "cloglog"),
+               weights = n,data = datos_agrup)
+summary(mod_cll)
+
+AIC(mod_logit, mod_probit, mod_cll) #Son los 3 iguales (aprieta el puño con rabia)
+
+# Bondad de ajuste:
+pchisq(mod_logit$deviance, mod_logit$df.residual, ncp = 0, 
+       lower.tail = FALSE, log.p = FALSE)
+pchisq(mod_probit$deviance, mod_probit$df.residual, ncp = 0, 
+       lower.tail = FALSE, log.p = FALSE)
+pchisq(mod_cll$deviance, mod_cll$df.residual, ncp = 0, 
+       lower.tail = FALSE, log.p = FALSE)
+
+# Al todos ajustar y tener el mismo AIC, nos quedamos con el enlace logit 
+# (igual, preguntaría si está bien lo de que sea un modelo saturado)
+
+# Gráfico de las "working responses"
+z_logit <- resid(mod_logit, type = "working") + mod_logit$linear.predictor
+
+ggplot(datos_agrup, aes(y = mod_logit$linear.predictor, x = z_logit)) + 
+  geom_point(fill = "maroon", shape = 21, size = 3) +
+  labs(title = "Working responses vs. predictor lineal", x = "Z" , y = expression(eta),
+       subtitle = "Modelo logit") +
+  geom_abline(intercept = 0, slope = 1) +
+  theme_minimal()
+
+# Hay relación lineal, probamos el test de (eta)^2
+
+# 1) MODELO LOGIT
+pred.logit<-predict(mod_logit)
+datos_agrup$pred.2.logit<-pred.logit*pred.logit
+
+mod_logit.2 <- glm(y/n ~ cap_shape + pred.2.logit, family=binomial(link="logit"), 
+                    weights=n,data=datos_agrup)
+
+summary(mod_logit.2)
+anova(mod_logit, mod_logit.2, test="LRT") 
+
+# Al tener los dos modelos el mismo valor de deviance, ajustan por igual; por ende
+# el enlace es correcto.
+
+
+modelo_final <- mod_logit
+summary(modelo_final) # La categoría de referencia es "b" = campana
+
+
+# Se calculan las RO estimadas.
