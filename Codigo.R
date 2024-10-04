@@ -26,14 +26,15 @@ hongos %>% mutate(cap_shape = as.factor(cap_shape),
 ## Recategorizacion
 
 hongos = hongos %>% mutate(gill_color = case_when(gill_color == "e" | gill_color == "y" | gill_color == "o" | gill_color == "p" ~ "Calidos",
-                                                  gill_color == "u" | gill_color == "f" | gill_color == "r" ~ "Frios",
+                                                  gill_color == "u" | gill_color == "r" ~ "Frios",
                                                   gill_color == "w" | gill_color == "g" | gill_color == "b" ~ "Claros",
-                                                  gill_color == "n" | gill_color == "k" ~ "Oscuros"),
+                                                  gill_color == "n" | gill_color == "k" ~ "Oscuros",
+                                                  gill_color == "f" ~ "Ninguno"),
                            gill_attachment = case_when(gill_attachment == "a" | gill_attachment == "x"~ "Adjuntas",
                                                        gill_attachment == "s" | gill_attachment == "p" | gill_attachment == "u" ~ "Otros",
                                                        gill_attachment == "e"  ~ "Libre",
-                                                       gill_attachment == "f" ~ "None",
-                                                       gill_attachment == "d"~ "No se donde va esta"))
+                                                       gill_attachment == "f" ~ "Ninguno",
+                                                       gill_attachment == "d"~ "Decurrente"))
 
 
 
@@ -139,10 +140,10 @@ if(pchisq(modelo8$null.deviance-modelo8$deviance,length(unique(datos_sample$seas
 }
 
 semilla = i
-
-
-
 }
+
+
+
 
 
 puntaje
@@ -323,4 +324,56 @@ pchisq(comp24$Deviance[2],comp24$Df[2],lower.tail = F)
 
 # Las interacciones no se pueden hacer porque no están todos los cruces de 
 # catgorías.
+
+
+
+# Caso para semilla 205
+
+set.seed(205)  
+
+datos_sample = hongos[sample(61069,250),]
+
+#Modelo inical
+
+modelo1 <- glm(class ~ cap_diameter + cap_shape + gill_attachment + gill_color, family = binomial(link="logit"),
+               data = datos_sample)
+
+modelo2 = glm(class ~  cap_shape , family = binomial(link="logit"),
+              data = datos_sample)
+
+modelo3 = glm(class ~  gill_attachment , family = binomial(link="logit"),
+              data = datos_sample)
+
+modelo4 = glm(class ~  gill_color , family = binomial(link="logit"),
+              data = datos_sample)
+
+
+pchisq(modelo1$null.deviance-modelo1$deviance,1, lower.tail = F)
+pchisq(modelo2$null.deviance-modelo2$deviance,length(unique(datos_sample$cap_shape))-1, lower.tail = F)
+pchisq(modelo3$null.deviance-modelo3$deviance,length(unique(datos_sample$gill_attachment))-1, lower.tail = F)
+pchisq(modelo4$null.deviance-modelo4$deviance,length(unique(datos_sample$gill_color))-1, lower.tail = F)
+
+
+
+modelo5 <- glm(class ~ gill_color + cap_shape , family = binomial(link="logit"),
+               data = datos_sample)
+
+comp1 = anova(modelo2, modelo5)
+pchisq(comp1$Deviance[2],comp1$Df[2],lower.tail = F)
+comp2 = anova(modelo4, modelo5)
+pchisq(comp2$Deviance[2],comp2$Df[2],lower.tail = F)
+
+modelo6 <- glm(class ~ gill_attachment + cap_shape , family = binomial(link="logit"),
+               data = datos_sample)
+
+modelo7 <- glm(class ~ cap_diameter + cap_shape , family = binomial(link="logit"),
+               data = datos_sample)
+
+
+
+comp3 = anova(modelo2, modelo6)
+pchisq(comp3$Deviance[2],comp3$Df[2],lower.tail = F)
+comp4 = anova(modelo2, modelo7)
+pchisq(comp4$Deviance[2],comp4$Df[2],lower.tail = F)
+
 
