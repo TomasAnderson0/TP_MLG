@@ -378,9 +378,37 @@ ggplot() +
   aes(y = cap_diameter, x = factor(class)) +
   geom_boxplot() + scale_x_discrete(name = "Hongo", labels = c("Venenoso", "Comestible")) 
 
+# Barras apiladas
 
+datos_sample %>% group_by(cap_shape, class) %>% count() %>% 
+  ggplot() +
+  aes(x = cap_shape, fill = factor(class), y = n) +
+  geom_bar(position = "fill",  stat="identity") +
+  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
+  scale_x_discrete(name = "Sombrero", labels = c("b" = "campana", "c" = "cónico", "f" = "plano","x" = "convexo","s" = "hundido","o" = "otros", "p" = "esferico")) +
+  labs(y = "Frecuencia", 
+       title = "Gráfico 2; Cantidad de hongos según la forma del sombrero") +
+  theme_bw()
 
+datos_sample %>% group_by(gill_attachment, class) %>% count() %>% 
+  ggplot() +
+  aes(x = gill_attachment, fill = factor(class), y = n) +
+  geom_bar(position = "fill",  stat="identity") +
+  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
+  scale_x_discrete(name = "Sombrero") +
+  labs(y = "Frecuencia", 
+       title = "Gráfico 3; Cantidad de hongos según") +
+  theme_bw()
 
+datos_sample %>% group_by(gill_color, class) %>% count() %>% 
+  ggplot() +
+  aes(x = gill_color, fill = factor(class), y = n) +
+  geom_bar(position = "fill",  stat="identity") +
+  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
+  scale_x_discrete(name = "Sombrero") +
+  labs(y = "Frecuencia", 
+       title = "Gráfico 4; Cantidad de hongos según") +
+  theme_bw()
 
 #Modelo inical
 
