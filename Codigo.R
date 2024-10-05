@@ -18,7 +18,7 @@ colnames(hongos) = c("class", "cap_diameter","cap_shape", "gill_attachment",
                      "gill_color", "stem_height", "stem_width", "stem_color", 
                      "season")
 
-hongos %>% mutate(cap_shape = as.factor(cap_shape), 
+hongos = hongos %>% mutate(cap_shape = as.factor(cap_shape), 
                  gill_attachment = as.factor(gill_attachment),
                  gill_color = as.factor(gill_color),
                  stem_color = as.factor(stem_color),
@@ -348,11 +348,38 @@ ggplot(datos_sample) +
   aes(x = cap_shape, fill = factor(class)) +
   geom_bar(position = "dodge") +
   scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
-  scale_x_discrete(name = "Sombrero", guide = c("b = campana", "c = cónico")) +
+  scale_x_discrete(name = "Sombrero", labels = c("b" = "campana", "c" = "cónico", "f" = "plano","x" = "convexo","s" = "hundido","o" = "otros", "p" = "esferico")) +
   labs(y = "Frecuencia", 
        title = "Gráfico 2; Cantidad de hongos según la forma del sombrero") +
   theme_bw()
-  
+
+ggplot(datos_sample) +
+  aes(x = gill_attachment, fill = factor(class)) +
+  geom_bar(position = "dodge") +
+  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
+  scale_x_discrete(name = "Sombrero") +
+  labs(y = "Frecuencia", 
+       title = "Gráfico 3; Cantidad de hongos según") +
+  theme_bw()
+
+ggplot(datos_sample) +
+  aes(x = gill_color, fill = factor(class)) +
+  geom_bar(position = "dodge") +
+  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
+  scale_x_discrete(name = "Sombrero") +
+  labs(y = "Frecuencia", 
+       title = "Gráfico 4; Cantidad de hongos según") +
+  theme_bw()
+
+datos_sample %>% 
+  #saco la observacion de 60 para que se vea bien los boxplots
+  filter(cap_diameter<50) %>% 
+ggplot() +
+  aes(y = cap_diameter, x = factor(class)) +
+  geom_boxplot() + scale_x_discrete(name = "Hongo", labels = c("Venenoso", "Comestible")) 
+
+
+
 
 
 #Modelo inical
