@@ -335,48 +335,26 @@ datos_sample = hongos[sample(61069,250),]
  
 # Análisis descriptivo
 
+theme_set(theme_bw())
+
 ggplot(datos_sample) + 
   aes(x = factor(class), fill = factor(class)) + 
   geom_bar() +
   scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
   scale_x_discrete(name = "Hongo", labels = c("Venenoso", "Comestible")) +
   scale_y_continuous(breaks = seq(0, 150, 25)) +
-  labs(y = "Frecuencia", title = "Gráfico 1: Cantidad de hongos según categoría") +
-  theme_bw()
-
-ggplot(datos_sample) +
-  aes(x = cap_shape, fill = factor(class)) +
-  geom_bar(position = "dodge") +
-  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
-  scale_x_discrete(name = "Sombrero", labels = c("b" = "campana", "c" = "cónico", "f" = "plano","x" = "convexo","s" = "hundido","o" = "otros", "p" = "esferico")) +
-  labs(y = "Frecuencia", 
-       title = "Gráfico 2; Cantidad de hongos según la forma del sombrero") +
-  theme_bw()
-
-ggplot(datos_sample) +
-  aes(x = gill_attachment, fill = factor(class)) +
-  geom_bar(position = "dodge") +
-  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
-  scale_x_discrete(name = "Sombrero") +
-  labs(y = "Frecuencia", 
-       title = "Gráfico 3; Cantidad de hongos según") +
-  theme_bw()
-
-ggplot(datos_sample) +
-  aes(x = gill_color, fill = factor(class)) +
-  geom_bar(position = "dodge") +
-  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
-  scale_x_discrete(name = "Sombrero") +
-  labs(y = "Frecuencia", 
-       title = "Gráfico 4; Cantidad de hongos según") +
-  theme_bw()
+  labs(y = "Frecuencia", title = "Gráfico 1: Cantidad de hongos según categoría") 
 
 datos_sample %>% 
   #saco la observacion de 60 para que se vea bien los boxplots
   filter(cap_diameter<50) %>% 
 ggplot() +
-  aes(y = cap_diameter, x = factor(class)) +
-  geom_boxplot() + scale_x_discrete(name = "Hongo", labels = c("Venenoso", "Comestible")) 
+  aes(y = cap_diameter, x = factor(class), color = factor(class)) +
+  geom_boxplot() + 
+  scale_x_discrete(name = "Hongo", labels = c("Venenoso", "Comestible")) + 
+  scale_y_continuous(name = "Diámetro") +
+  scale_color_manual(values = c("slateblue", "orangered"), guide = "none") +
+  labs(title = "Gráfico 2: Diámetro del sombrero según tipo de hongo")
 
 # Barras apiladas
 
@@ -387,28 +365,27 @@ datos_sample %>% group_by(cap_shape, class) %>% count() %>%
   scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
   scale_x_discrete(name = "Sombrero", labels = c("b" = "campana", "c" = "cónico", "f" = "plano","x" = "convexo","s" = "hundido","o" = "otros", "p" = "esferico")) +
   labs(y = "Frecuencia", 
-       title = "Gráfico 2; Cantidad de hongos según la forma del sombrero") +
-  theme_bw()
+       title = "Gráfico 2: Cantidad de hongos según la forma del sombrero") 
 
 datos_sample %>% group_by(gill_attachment, class) %>% count() %>% 
   ggplot() +
   aes(x = gill_attachment, fill = factor(class), y = n) +
   geom_bar(position = "fill",  stat="identity") +
   scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
-  scale_x_discrete(name = "Sombrero") +
-  labs(y = "Frecuencia", 
-       title = "Gráfico 3; Cantidad de hongos según") +
-  theme_bw()
+  scale_x_discrete(name = "Láminas") +
+  labs(y = "Frecuencia relativa", 
+       title = "Gráfico 3: Cantidad de hongos según tipo de lámina") 
 
 datos_sample %>% group_by(gill_color, class) %>% count() %>% 
   ggplot() +
   aes(x = gill_color, fill = factor(class), y = n) +
   geom_bar(position = "fill",  stat="identity") +
   scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
-  scale_x_discrete(name = "Sombrero") +
-  labs(y = "Frecuencia", 
-       title = "Gráfico 4; Cantidad de hongos según") +
-  theme_bw()
+  scale_x_discrete(name = "Colores") +
+  labs(y = "Frecuencia relativa", 
+       title = "Gráfico 4: Cantidad de hongos según color de las láminas") 
+
+
 
 #Modelo inical
 
@@ -486,6 +463,8 @@ pchisq(mod_cll$deviance, mod_cll$df.residual, ncp = 0,
 # Al todos ajustar y tener el mismo AIC, nos quedamos con el enlace logit 
 # (igual, preguntaría si está bien lo de que sea un modelo saturado)
 
+
+
 # Gráfico de las "working responses"
 z_logit <- resid(mod_logit, type = "working") + mod_logit$linear.predictor
 
@@ -517,3 +496,39 @@ summary(modelo_final) # La categoría de referencia es "b" = campana
 
 
 # Se calculan las RO estimadas.
+
+
+
+# Vemos la capacidad predictiva del modelo.
+mod_dnagrup <- glm(class ~ cap_shape, family = binomial, data = datos_sample)
+mod_completo <- glm(class ~ cap_diameter + cap_shape + gill_attachment + gill_color,
+                     family = binomial, data = datos_sample)
+par(pty = "s") # Para que grafique sólo en el (0;1)
+roc1 <- pROC::roc(datos_sample$class, fitted(mod_dnagrup), plot = TRUE,
+    ylab = "Sensibilidad", 
+    xlab = "1 - Especificidad", xaxt = "n",
+    main = "Curva ROC",
+    print.thres = T, # Imprimir el punto de corte (con las coord de
+    # sensibilidad y 1-especificidad)
+    print.thres.col = "black", 
+    print.thres.cex=0.8,
+    print.auc = T, #  Imprimir área bajo la curva
+    col = "#377eb8", 
+    lwd = 4)
+roc2 <- pROC::roc(datos_sample$class, fitted(mod_completo), plot = TRUE,
+                  ylab = "Sensibilidad", 
+                  xlab = "1 - Especificidad", xaxt = "n",
+                  main = "Curva ROC",
+                  print.thres = T, # Imprimir el punto de corte (con las coord de
+                  # sensibilidad y 1-especificidad)
+                  print.thres.col = "black", 
+                  print.thres.cex=0.8,
+                  print.auc = T, #  Imprimir área bajo la curva
+                  col = "#377eb8", 
+                  lwd = 4)
+
+
+plot(roc1, col = "slateblue", lwd = 2)
+lines(roc2, col = "orangered", lwd = 2)
+
+axis(1, at = c(0, .2, .4, .6, .8, 1), labels = c("1", "0.8", "0.6", "0.4", "0.2", "0"), pos = -.04)
