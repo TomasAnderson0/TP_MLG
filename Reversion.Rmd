@@ -41,7 +41,7 @@ hongos = hongos %>% mutate(cap_shape = as.factor(cap_shape),
 hongos = hongos %>% 
   mutate(gill_color = case_when(
     gill_color == "e" | gill_color == "y" | gill_color == "o" | gill_color == "p" ~ "Calidos",
-    gill_color == "u" | gill_color == "r" | gill_color == "l" ~ "Frios",
+    gill_color == "u" | gill_color == "r" ~ "Frios",
     gill_color == "w" | gill_color == "g" | gill_color == "b" ~ "Claros",
     gill_color == "n" | gill_color == "k" ~ "Oscuros",
     gill_color == "f" ~ "Ninguno"),
@@ -51,7 +51,13 @@ hongos = hongos %>%
       gill_attachment == "e"  ~ "Libre",
       gill_attachment == "f" ~ "Ninguno",
       gill_attachment == "d"~ "Decurrente"),
-    stem_color = gill_color,
+    stem_color = case_when(
+      stem_color == "e" | stem_color == "y" | stem_color == "o" | stem_color == "p" ~ "Calidos",
+    stem_color == "u" | stem_color == "r" | stem_color == "l" ~ "Frios",
+    stem_color == "w" | stem_color == "g" | stem_color == "b" ~ "Claros",
+    stem_color == "n" | stem_color == "k" ~ "Oscuros",
+    stem_color == "f" ~ "Ninguno")
+      ,
     cap_shape = case_when(
       cap_shape == "f" ~ "Chato",
       cap_shape == "s" ~ "Hundido",
@@ -154,6 +160,8 @@ muestra %>% group_by(season, class) %>% count() %>%
        title = "Gráfico 4: Cantidad de hongos según color de las láminas") 
 
 
+
+
 ```
 
 
@@ -190,122 +198,116 @@ anova(mod_int, mod_gattch, test = "LRT")
 anova(mod_int, mod_gcolor, test = "LRT") 
 anova(mod_int, mod_sheight, test = "LRT") 
 anova(mod_int, mod_swidth, test = "LRT") 
-anova(mod_int, mod_scolor, test = "LRT") 
+anova(mod_int, mod_scolor, test = "LRT") # Significativa
 anova(mod_int, mod_season, test = "LRT") # Significativa
 
 ```
 
 
 ```{r}
-mod_1 <- glm(class ~ cap_diameter + cap_shape + season, family = binomial(link = "logit"),
+mod_1 <- glm(class ~ cap_diameter + cap_shape + stem_color + season, 
+             family = binomial(link = "logit"),
              data = muestra)
 
-mod_sin_diam <- glm(class ~  cap_shape + season, family = binomial(link = "logit"),
+mod_sin_diam <- glm(class ~  cap_shape + stem_color + season, 
+                    family = binomial(link = "logit"),
+                    data = muestra)
+
+mod_sin_shape <- glm(class ~ cap_diameter + stem_color + season, 
+                     family = binomial(link = "logit"),
+                     data = muestra)
+
+mod_sin_scolor <- glm(class ~ cap_diameter + cap_shape + season, 
+             family = binomial(link = "logit"),
              data = muestra)
 
-mod_sin_shape <- glm(class ~ cap_diameter + season, family = binomial(link = "logit"),
-             data = muestra)
+mod_sin_season <- glm(class ~ cap_diameter + cap_shape + stem_color, 
+                      family = binomial(link = "logit"),
+                      data = muestra)
 
-mod_sin_season <- glm(class ~ cap_diameter + cap_shape, family = binomial(link = "logit"),
-             data = muestra)
 
 # Nivel de significacion = 0.05
 
 anova(mod_sin_diam, mod_1, test = "LRT")
 anova(mod_sin_shape, mod_1, test = "LRT")
-anova(mod_sin_season, mod_1, test = "LRT") # p-v = 0.09, el beta asoc. a season es 0
+anova(mod_sin_scolor, mod_1, test = "LRT")
+anova(mod_sin_season, mod_1, test = "LRT") # p-v = 0.05, el beta asoc. a season es 0
 ```
 
 
 ```{r}
-mod_2 <- mod_sin_season
 
-mod_3 <- glm(class ~ cap_diameter + cap_shape + gill_attachment, 
+mod_3 <- glm(class ~ cap_diameter + cap_shape + stem_color + gill_attachment, 
              family = binomial(link = "logit"), data = muestra)
 
-mod_4 <- glm(class ~ cap_diameter + cap_shape + gill_color, 
+mod_4 <- glm(class ~ cap_diameter + cap_shape + stem_color + gill_color, 
              family = binomial(link = "logit"), data = muestra)
 
-mod_5 <- glm(class ~ cap_diameter + cap_shape + stem_height, 
+mod_5 <- glm(class ~ cap_diameter + cap_shape + stem_color + stem_height, 
              family = binomial(link = "logit"), data = muestra)
 
-mod_6 <- glm(class ~ cap_diameter + cap_shape + stem_width, 
-             family = binomial(link = "logit"), data = muestra)
-
-mod_7 <- glm(class ~ cap_diameter + cap_shape + stem_color, 
+mod_6 <- glm(class ~ cap_diameter + cap_shape + stem_color + stem_width, 
              family = binomial(link = "logit"), data = muestra)
 
 
 # Nivel de significacion = 0.05
 
-anova(mod_2, mod_3, test = "LRT") 
-anova(mod_2, mod_4, test = "LRT")
-anova(mod_2, mod_5, test = "LRT")
-anova(mod_2, mod_6, test = "LRT")
-anova(mod_2, mod_7, test = "LRT")
+anova(mod_sin_season, mod_3, test = "LRT") 
+anova(mod_sin_season, mod_4, test = "LRT")
+anova(mod_sin_season, mod_5, test = "LRT")
+anova(mod_sin_season, mod_6, test = "LRT")
+
+# El modelo final es "cap_diameter + cap_shape + stem_color" = mod_sin_season
+summary(mod_sin_season)
 
 
-# El modelo final es "cap_diameter + cap_shape" = mod_2
-summary(mod_2)
-
-mod_int <- glm(class ~ cap_diameter*cap_shape , family = binomial(link = "logit"),
-               data = muestra)
-summary(mod_int)
-anova(mod_2, mod_int, test = "LRT")
+ # mod_inter <- glm(class ~ cap_diameter +cap_shape + stem_color + cap_diameter*cap_shape + cap_diameter*stem_color , family = binomial(link = "logit"),
+ #                data = muestra)
+ # summary(mod_inter)
+ # anova(mod_sin_season, mod_inter, test = "LRT")
 
 ```
 
 
 ```{r}
-# Ajuste de diferentes enlaces
-
-modelo_logit <- mod_int
-modelo_probit <- glm(class ~ cap_diameter*cap_shape, family = binomial(link = "probit"),
-                     data = muestra)
-modelo_cll <- glm(class ~ cap_diameter*cap_shape, family = binomial(link = "cloglog"),
-                     data = muestra)
+# De momento nos quedamos con el modelo 2 que tiene enlace logit
+mod_sin_season
 
 # Bondad de ajuste de cada  modelo
 # H0) "El modelo ajusta" vs H1) "El modelo no ajusta"
 
-hoslem.test(muestra$class, fitted(modelo_logit), g = 10)
-hoslem.test(muestra$class, fitted(modelo_probit), g = 10)
-hoslem.test(muestra$class, fitted(modelo_cll), g = 10)
-
-# En los 3 casos NO rechazo H0), por lo que no hay falta de bondad de ajuste en 
-# ninguno de los 3 enlaces
-
-# Criterio de Akaike:
-AIC(modelo_logit, modelo_probit, modelo_cll)
-# El enlace "cloglog" queda descartado por tener el AIC mayor, peeeero el debate
-# está entre el logit (331.58) y el probit (331.38).
+hoslem.test(muestra$class, fitted(mod_sin_season), g = 10)
+# No hay falta de ajuste
 ```
 
 ```{r}
 # Dada la duda entre "logit" y "probit", evaluo si el enlace es adecuado:
 
-pred.logit<-predict(modelo_logit)
+pred.logit<-predict(mod_sin_season)
 muestra$pred.2.logit<-pred.logit*pred.logit
 
-modelo_logit.2 <- glm(class ~ cap_diameter*cap_shape + pred.2.logit, 
+modelo_logit.2 <- glm(class ~ cap_diameter + cap_shape + stem_color + pred.2.logit, 
                         family=binomial(link="logit"),
                         data=muestra)
-anova(modelo_logit, modelo_logit.2, test="LRT")
 
-pred.probit<-predict(modelo_probit)
-muestra$pred.2.probit<-pred.probit*pred.probit
+summary(modelo_logit.2)
+anova(mod_sin_season, modelo_logit.2, test="LRT")
 
-modelo_probit.2 <- glm(class ~ cap_diameter*cap_shape + pred.2.probit, 
-                        family=binomial(link="probit"), 
-                        data=muestra)
-anova(modelo_probit, modelo_probit.2, test="LRT")
+```
 
-pred.cll<-predict(modelo_cll)
-muestra$pred.2.cll<-pred.cll*pred.cll
+# Razones de ODDS
+```{r}
+# Comparo diametros con un incremento en 1cm
 
-modelo_cll.2 <- glm(class ~ cap_diameter*cap_shape + pred.2.cll, 
-                        family=binomial(link="cloglog"), 
-                        data=muestra)
-anova(modelo_cll, modelo_cll.2, test="LRT")
+RO_diameter <- exp(5*0.05324)
+
+# Comparo los tipos de sombrero
+
+RO_hundido <- exp(-0.73106)
+RO_otro <- exp(-1.84097)
+RO_redondo <- exp(-0.82245)
+
+table(muestra$class, muestra$cap_shape)
+# Comparo los colores
 ```
 
