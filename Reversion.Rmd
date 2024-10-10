@@ -71,6 +71,13 @@ hongos = hongos %>%
 # Extracción de la muestra
 set.seed(154)
 muestra <- hongos[sample(61069,250),]
+
+# Categorías de referencia
+muestra$cap_shape <- relevel(factor(muestra$cap_shape), "Redondeado")
+muestra$gill_color <- relevel(factor(muestra$gill_color), "Claros")
+muestra$stem_color <- relevel(factor(muestra$stem_color), "Claros")
+muestra$season <- relevel(factor(muestra$season), "a")
+
 ```
 
 ```{r}
@@ -161,11 +168,12 @@ muestra %>% group_by(season, class) %>% count() %>%
 
 
 
-
 ```
 
 
 ```{r}
+
+
 # Seleccion de modelo
 set.seed(245)
 
@@ -295,19 +303,50 @@ anova(mod_sin_season, modelo_logit.2, test="LRT")
 
 ```
 
+# Analisis de residuos
+
+```{r}
+
+```
+
+
 # Razones de ODDS
 ```{r}
-# Comparo diametros con un incremento en 1cm
+summary(mod_sin_season)
+# Comparo diametros con un incremento en 5cm
 
-RO_diameter <- exp(5*0.05324)
+RO_diameter <- exp(5*0.06048)
+ic_diameter <- c(exp(5*0.06048)-1.96*5*0.02513, exp(5*0.06048)+1.96*5*0.02513)
 
 # Comparo los tipos de sombrero
 
-RO_hundido <- exp(-0.73106)
-RO_otro <- exp(-1.84097)
-RO_redondo <- exp(-0.82245)
+RO_chato <- exp(0.79678)
+ic_chato <- c(exp(0.79678)-1.96*0.33744, exp(0.79678)+1.96*0.33744)
 
-table(muestra$class, muestra$cap_shape)
+RO_hundido <- exp(0.07314)
+ic_hundido <- c(exp(0.07134)-1.96*0.43287, exp(0.07134)+1.96*0.43287)
+# No interpretar
+
+RO_otro <- exp(-1.39631)
+ic_otro <- c(exp(-1.39631)-1.96*0.73607, exp(-1.39631)+1.96*0.73607)
+# No interpretar
+
 # Comparo los colores
+
+RO_calidos <- exp(-0.84792)
+ic_calidos <- c(exp(-0.84792)-1.96*0.35379, exp(-0.84792)+1.96*0.35379)
+# No interpretar
+
+RO_frios <- exp(-0.58411)
+ic_frios <- c(exp(-0.58411)-1.96*0.64955, exp(-0.58411)+1.96*0.64955)
+# No interpretar
+
+RO_ninguno <- exp(-14.177) 
+ic_ninguno <- c(exp(-14.177)-1.96*840.05107, exp(-14.177)+1.96*840.05107)
+# No interpretar
+
+RO_oscuros <- exp(-1.26587)
+ic_oscuros <- c(exp(-1.26587)-1.96*0.35123, exp(-1.26587)+1.96*0.35123)
+
 ```
 
