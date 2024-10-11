@@ -278,8 +278,28 @@ summary(mod_sin_season)
 
 
 ```{r}
-# De momento nos quedamos con el modelo 2 que tiene enlace logit
-mod_sin_season
+# De momento nos quedamos con "mod_sin_season" que tiene enlace logit
+
+# Prueba de LINEALIDAD
+muestra <- muestra %>% 
+  mutate(diam_factor = case_when(
+    cap_diameter < 3.507 ~ 1,
+    cap_diameter >= 3.507 & cap_diameter < 6.155 ~ 2,
+    cap_diameter >= 6.155 & cap_diameter < 8.822 ~ 3,
+    cap_diameter >= 8.822 ~ 4),
+    diam_d1 = ifelse(cap_diameter >= 3.507 & cap_diameter < 6.155, 1, 0),
+    diam_d2 = ifelse(cap_diameter >= 6.155 & cap_diameter < 8.822, 1, 0),
+    diam_d3 = ifelse(cap_diameter >= 8.822, 1, 0)
+    )
+
+mod_factor <- glm(class ~ diam_factor + cap_shape + stem_color, 
+                  family = binomial(link = "logit"), data = muestra)
+summary(mod_factor)
+mod_dummies <- glm(class ~ diam_d1 + diam_d2 + diam_d3 + cap_shape + stem_color,
+                      family = binomial(link = "logit"), data = muestra)
+summary(mod_dummies)
+anova(mod_factor, mod_dummies, test = "LRT")
+
 
 # Bondad de ajuste de cada  modelo
 # H0) "El modelo ajusta" vs H1) "El modelo no ajusta"
@@ -289,7 +309,7 @@ hoslem.test(muestra$class, fitted(mod_sin_season), g = 10)
 ```
 
 ```{r}
-# Dada la duda entre "logit" y "probit", evaluo si el enlace es adecuado:
+# Adecuación del enlace
 
 pred.logit<-predict(mod_sin_season)
 muestra$pred.2.logit<-pred.logit*pred.logit
@@ -306,7 +326,36 @@ anova(mod_sin_season, modelo_logit.2, test="LRT")
 # Analisis de residuos
 
 ```{r}
+# EVALUACION COMPONENTE SISTEMATICA
 
+# Residuos cuantil
+rQ.logit <- statmod::qresid(mod_sin_season)
+
+### Gráfico de residuos cuantil vs. probabilidades estimadas (ajuste cloglog)
+G1 <- ggplot(muestra, aes(y = rQ.logit, x = fitted(mod_sin_season))) + 
+  geom_point(fill = "olivedrab2", shape = 21, size = 3) +
+  geom_hline(yintercept = 0) + ylim(-3, 3) + 
+  geom_hline(yintercept = -3, linetype = "dashed") + 
+  geom_hline(yintercept =  3, linetype = "dashed") +
+  labs(title = "Gráfico de residuos cuantil vs. las probabilidades estimadas", 
+       x = expression(hat(pi)), y = "Residuos cuantil")
+
+
+
+# EVALUACION COMPONENTE ALETAORIA
+
+# Reduzco el número de observaciones para que el gráfico quede más "lindo" 
+# (menos comprimidas las obs.)
+
+# Gráfico QQ
+G2 <- ggplot(muestra[1:100,], aes(sample = rQ.logit[1:100])) +
+  stat_qq(distribution = qnorm, fill = "olivedrab2", shape = 21, size = 3) +
+  stat_qq_line() +
+  labs(title = "Gráfico probabilístico normal con residuos cuantil",  
+       x = "Cuantiles teóricos", y = "Cuantiles de los residuos cuantil")
+
+G1
+G2
 ```
 
 
@@ -348,5 +397,32 @@ ic_ninguno <- c(exp(-14.177)-1.96*840.05107, exp(-14.177)+1.96*840.05107)
 RO_oscuros <- exp(-1.26587)
 ic_oscuros <- c(exp(-1.26587)-1.96*0.35123, exp(-1.26587)+1.96*0.35123)
 
+```
+
+
+# Capacidad predictiva
+
+```{r}
+par(pty = "s") # Para que grafique sólo en el (0;1)
+pROC::roc(muestra$class, fitted(mod_sin_season), plot = TRUE,
+    ylab = "Sensibilidad", 
+    xlab = "1 - Especificidad", xaxt = "n",
+    main = "Curva ROC",
+    print.thres = T, # Imprimir el punto de corte (con las coord de
+    # sensibilidad y 1-especificidad)
+    print.thres.col = "black", 
+    print.thres.cex=0.8,
+    print.auc = T, #  Imprimir área bajo la curva
+    col = "olivedrab2", 
+    lwd = 4)
+```
+
+
+```{r}
+y_obs  <- factor(ifelse(muestra$class == 1, "Comestible", "Venenoso"), 
+                 levels = c("Venenoso", "Comestible"))
+y_pred <- factor(ifelse(fitted(mod_sin_season
+  ) >= .518, "Comestible", "Venenoso"), levels = c("Venenoso", "Comestible"))
+caret::confusionMatrix(data = y_pred, reference = y_obs, positive = "Comestible")
 ```
 
