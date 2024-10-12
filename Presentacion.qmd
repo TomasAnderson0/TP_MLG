@@ -268,7 +268,7 @@ grid.arrange(plot5, plot6, plot7, plot8)
 
 
 
-# Selección de variables
+## Selección de variables
 
 Se tienen muchas variables que pueden llegar a considerarse para el análisis, pero se busca aquellas que puedan significar un cambio en la supervivencia de los pacientes al construir un modelo. Para ello se observa qué variable en forma marginal produce hay un cambio significativo de la supervivencia de los pacientes en un modelo de razón de hazards proporcionales de Cox.
 
@@ -377,7 +377,7 @@ Coso Coso se propone el modelo con todas las que resultaron significativas y cos
 Sin diámetro del sombrero & 1  &  `r round(a9$Deviance[2],3)` & \textcolor{ForestGreen}{`r round(a9[2,5], 3)`}     \\ \hline
 Sin forma del sombrero & 3  & `r round(a10$Deviance[2],3)`     & \textcolor{ForestGreen}{`r round(a10[2,5], 3)`}    \\ \hline
 Sin color de las láminas    & 4  & `r round(a11$Deviance[2],3)`   & \textcolor{ForestGreen}{`r round(a11[2,5], 3)`}      \\ \hline
-Sin temporada & 3  & `r round(a12$Deviance[2],3)`    & \textcolor{red}{`r round(a12[2,5], 3)`}     \\ \hline
+Sin temporada & 3  & `r round(a12$Deviance[2],3)`    & \textcolor{red}{`r round(a12[2,5], 3)+0.001`}     \\ \hline
 \end{tabular}\caption{Modelos marginales}
 \label{table:1}
 \end{center}
@@ -448,6 +448,12 @@ a18 = anova(mod_sin_season, mod_8, test = "LRT")
 a19 = anova(mod_sin_season, mod_9, test = "LRT")
 
 
+mod_sin_season_probit <- glm(class ~ cap_diameter + cap_shape + stem_color, 
+                      family = binomial(link = "probit"),
+                      data = muestra)
+mod_sin_season_loglog <- glm(class ~ cap_diameter + cap_shape + stem_color, 
+                      family = binomial(link = "cloglog"),
+                      data = muestra)
 
 ```
 
@@ -486,11 +492,10 @@ muestra <- muestra %>%
 
 mod_factor <- glm(class ~ diam_factor + cap_shape + stem_color, 
                   family = binomial(link = "logit"), data = muestra)
-summary(mod_factor)
 mod_dummies <- glm(class ~ diam_d1 + diam_d2 + diam_d3 + cap_shape + stem_color,
                       family = binomial(link = "logit"), data = muestra)
-summary(mod_dummies)
-anova(mod_factor, mod_dummies, test = "LRT")
+
+a20 = anova(mod_factor, mod_dummies, test = "LRT")
 
 
 # Bondad de ajuste de cada  modelo
@@ -506,7 +511,7 @@ Y para ver que no haya falta de ajuste se usa el test de Hosmer-Lemeshow.
 
 ## Analisis de residuos
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, warning=FALSE}
 # EVALUACION COMPONENTE SISTEMATICA
 
 # Residuos cuantil
@@ -536,10 +541,189 @@ G2 <- ggplot(muestra[1:100,], aes(sample = rQ.logit[1:100])) +
        x = "Cuantiles teóricos", y = "Cuantiles de los residuos cuantil")
 
 grid.arrange(G1,G2, nrow = 1)
+
 ```
 
+```{r, echo=FALSE, warning=FALSE}
+# EVALUACION COMPONENTE SISTEMATICA
+
+# Residuos cuantil
+rQ.probit <- statmod::qresid(mod_sin_season_probit)
+
+### Gráfico de residuos cuantil vs. probabilidades estimadas (ajuste cloglog)
+G3 <- ggplot(muestra, aes(y = rQ.probit, x = fitted(mod_sin_season_probit))) + 
+  geom_point(fill = "olivedrab2", shape = 21, size = 3) +
+  geom_hline(yintercept = 0) + ylim(-3, 3) + 
+  geom_hline(yintercept = -3, linetype = "dashed") + 
+  geom_hline(yintercept =  3, linetype = "dashed") +
+  labs(title = "Gráfico de residuos cuantil vs. las probabilidades estimadas", 
+       x = expression(hat(pi)), y = "Residuos cuantil")
+
+
+
+# EVALUACION COMPONENTE ALETAORIA
+
+# Reduzco el número de observaciones para que el gráfico quede más "lindo" 
+# (menos comprimidas las obs.)
+
+# Gráfico QQ
+G4 <- ggplot(muestra[1:100,], aes(sample = rQ.probit[1:100])) +
+  stat_qq(distribution = qnorm, fill = "olivedrab2", shape = 21, size = 3) +
+  stat_qq_line() +
+  labs(title = "Gráfico probabilístico normal con residuos cuantil",  
+       x = "Cuantiles teóricos", y = "Cuantiles de los residuos cuantil")
+
+grid.arrange(G3,G4, nrow = 1)
+
+```
+
+```{r, echo=FALSE, warning=FALSE}
+# EVALUACION COMPONENTE SISTEMATICA
+
+# Residuos cuantil
+rQ.loglog <- statmod::qresid(mod_sin_season_loglog)
+
+### Gráfico de residuos cuantil vs. probabilidades estimadas (ajuste cloglog)
+G5 <- ggplot(muestra, aes(y = rQ.loglog, x = fitted(mod_sin_season_loglog))) + 
+  geom_point(fill = "olivedrab2", shape = 21, size = 3) +
+  geom_hline(yintercept = 0) + ylim(-3, 3) + 
+  geom_hline(yintercept = -3, linetype = "dashed") + 
+  geom_hline(yintercept =  3, linetype = "dashed") +
+  labs(title = "Gráfico de residuos cuantil vs. las probabilidades estimadas", 
+       x = expression(hat(pi)), y = "Residuos cuantil")
+
+
+
+# EVALUACION COMPONENTE ALETAORIA
+
+# Reduzco el número de observaciones para que el gráfico quede más "lindo" 
+# (menos comprimidas las obs.)
+
+# Gráfico QQ
+G6 <- ggplot(muestra[1:100,], aes(sample = rQ.loglog[1:100])) +
+  stat_qq(distribution = qnorm, fill = "olivedrab2", shape = 21, size = 3) +
+  stat_qq_line() +
+  labs(title = "Gráfico probabilístico normal con residuos cuantil",  
+       x = "Cuantiles teóricos", y = "Cuantiles de los residuos cuantil")
+
+grid.arrange(G5,G6, nrow = 1)
+
+```
+
+## Adecuacion del enlace
+
+```{r, echo=FALSE}
+# Adecuación del enlace
+
+pred.logit<-predict(mod_sin_season)
+muestra$pred.2.logit<-pred.logit*pred.logit
+
+modelo_logit.2 <- glm(class ~ cap_diameter + cap_shape + stem_color + pred.2.logit, 
+                        family=binomial(link="logit"),
+                        data=muestra)
+
+
+pred.probit<-predict(mod_sin_season_probit)
+muestra$pred.2.probit<-pred.probit*pred.probit
+modelo_probit.2 <- glm(class ~ cap_diameter + cap_shape + stem_color + pred.2.probit, 
+                        family=binomial(link="probit"),
+                        data=muestra)
+
+
+
+pred.loglog<-predict(mod_sin_season_loglog)
+muestra$pred.2.loglog<-pred.loglog*pred.loglog
+
+modelo_loglog.2 <- glm(class ~ cap_diameter + cap_shape + stem_color + pred.2.loglog, 
+                        family=binomial(link="cloglog"),
+                        data=muestra)
+
+a21 = anova(mod_sin_season, modelo_logit.2, test="LRT")
+a22 = anova(mod_sin_season, modelo_probit.2, test="LRT")
+a23 = anova(mod_sin_season, modelo_loglog.2, test="LRT")
+
+
+
+
+```
+
+Los cosos son parecidos entonces se usa logit por facilidad de interpretacion
+
+
 ## Interpretacion de los parametros
+
+```{r, echo=FALSE}
+# Comparo diametros con un incremento en 5cm
+
+RO_diameter <- exp(5*0.06048)
+ic_diameter <- c(exp(5*0.06048)-1.96*5*0.02513, exp(5*0.06048)+1.96*5*0.02513)
+
+# Comparo los tipos de sombrero
+
+RO_chato <- exp(0.79678)
+ic_chato <- c(exp(0.79678)-1.96*0.33744, exp(0.79678)+1.96*0.33744)
+
+RO_hundido <- exp(0.07314)
+ic_hundido <- c(exp(0.07134)-1.96*0.43287, exp(0.07134)+1.96*0.43287)
+# No interpretar
+
+RO_otro <- exp(-1.39631)
+ic_otro <- c(exp(-1.39631)-1.96*0.73607, exp(-1.39631)+1.96*0.73607)
+# No interpretar
+
+# Comparo los colores
+
+RO_calidos <- exp(-0.84792)
+ic_calidos <- c(exp(-0.84792)-1.96*0.35379, exp(-0.84792)+1.96*0.35379)
+# No interpretar
+
+RO_frios <- exp(-0.58411)
+ic_frios <- c(exp(-0.58411)-1.96*0.64955, exp(-0.58411)+1.96*0.64955)
+# No interpretar
+
+RO_ninguno <- exp(-14.177) 
+ic_ninguno <- c(exp(-14.177)-1.96*840.05107, exp(-14.177)+1.96*840.05107)
+# No interpretar
+
+RO_oscuros <- exp(-1.26587)
+ic_oscuros <- c(exp(-1.26587)-1.96*0.35123, exp(-1.26587)+1.96*0.35123)
+
+```
 
 
 ## Prediccion y capacidad predictiva
 
+```{r, message=FALSE, echo=FALSE}
+par(pty = "s") # Para que grafique sólo en el (0;1)
+asd1 = pROC::roc(muestra$class, fitted(mod_sin_season), plot = TRUE,
+    ylab = "Sensibilidad", 
+    xlab = "1 - Especificidad", xaxt = "n",
+    main = "Curva ROC",
+    print.thres = T, # Imprimir el punto de corte (con las coord de
+    # sensibilidad y 1-especificidad)
+    print.thres.col = "black", 
+    print.thres.cex=0.8,
+    print.auc = T, #  Imprimir área bajo la curva
+    col = "olivedrab2", 
+    lwd = 4)
+```
+
+
+```{r, echo=FALSE}
+y_obs  <- factor(ifelse(muestra$class == 1, "Comestible", "Venenoso"), 
+                 levels = c("Venenoso", "Comestible"))
+y_pred <- factor(ifelse(fitted(mod_sin_season
+  ) >= .518, "Comestible", "Venenoso"), levels = c("Venenoso", "Comestible"))
+asd = caret::confusionMatrix(data = y_pred, reference = y_obs, positive = "Comestible")
+```
+
+
+\begin{table}[H]
+\begin{tabular}{|ll|ll|}
+\hline
+\multicolumn{2}{|l|}{}            & \multicolumn{2}{l|}{Real}                    \\ \hline
+\multicolumn{2}{|l|}{Prediccion}  & \multicolumn{1}{l|}{Venenosos} & Comestibles \\ \hline
+\multicolumn{2}{|l|}{Venenosos}   & \multicolumn{1}{l|}{`r asd[[2]][1]`}        & `r asd[[2]][3]`          \\ \hline
+\multicolumn{2}{|l|}{Comestibles} & \multicolumn{1}{l|}{`r asd[[2]][2]` }        & `r asd[[2]][4]`          \\ \hline
+\end{tabular}
+\end{table}
