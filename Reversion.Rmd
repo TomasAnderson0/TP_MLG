@@ -159,12 +159,12 @@ muestra %>% group_by(stem_color, class) %>% count() %>%
 
 muestra %>% group_by(season, class) %>% count() %>% 
   ggplot() +
-  aes(x = gill_color, fill = factor(class), y = n) +
+  aes(x = season, fill = factor(class), y = n) +
   geom_bar(position = "fill",  stat="identity") +
   scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
   scale_x_discrete(name = "Colores") +
   labs(y = "Frecuencia relativa", 
-       title = "Gráfico 4: Cantidad de hongos según color de las láminas") 
+       title = "Gráfico 4: Cantidad de hongos según la temporada") 
 
 
 
@@ -402,7 +402,7 @@ ic_oscuros <- c(exp(-1.26587)-1.96*0.35123, exp(-1.26587)+1.96*0.35123)
 
 # Capacidad predictiva
 
-```{r}
+```{r, message=FALSE}
 par(pty = "s") # Para que grafique sólo en el (0;1)
 pROC::roc(muestra$class, fitted(mod_sin_season), plot = TRUE,
     ylab = "Sensibilidad", 

@@ -1,0 +1,307 @@
+---
+format: pdf
+editor: visual
+lang: "es"
+header-includes:
+  - \usepackage{ragged2e}
+  - \usepackage{hyperref}
+---
+
+\Centering
+
+\vspace{3cm}
+
+\pagenumbering{gobble}
+
+\vspace{5cm}
+
+\large
+
+LICENCIATURA EN ESTADÍSTICA
+
+\vspace{1cm}
+
+```{=tex}
+\large
+\Huge
+```
+"Una masacre estadística" \Huge \newline \vspace{0.3cm}
+
+\normalsize
+
+Trabajo Práctico 3 \vspace{1cm}
+
+Autores: Tomás Anderson - Alejo Vaschetti - Rocio Yael Canteros
+
+Docentes: Gabriela Boggio - Victorio Costa - Guillermina Harvey
+
+16/10/2024 \normalsize
+
+```{=tex}
+\newpage
+\hypersetup{linkcolor = black}
+\tableofcontents
+```
+```{=tex}
+\newpage
+\pagenumbering{arabic}
+```
+```{=tex}
+\RaggedRight
+\newpage
+```
+
+```{r, echo=FALSE, message=FALSE}
+# ---Librerias---
+library(readr)
+library(tidyverse)
+library(ggplot2)
+library(ResourceSelection)
+
+# ---Datos---
+data_original <- read_delim("secondary_data.csv", 
+                            delim = ";", escape_double = FALSE, trim_ws = TRUE)
+
+hongos <- data_original %>% 
+  select(class, `cap-diameter`, `cap-shape`, `gill-attachment`, `gill-color`, 
+         `stem-height`, `stem-width`, `stem-color`, season) %>% 
+  mutate(class = ifelse(class == "e", 1, 0)) %>% 
+  replace_na(list(`gill-attachment` = "u"))
+
+colnames(hongos) = c("class", "cap_diameter","cap_shape", "gill_attachment", 
+                     "gill_color", "stem_height", "stem_width", "stem_color", 
+                     "season")
+
+hongos = hongos %>% mutate(cap_shape = as.factor(cap_shape), 
+                 gill_attachment = as.factor(gill_attachment),
+                 gill_color = as.factor(gill_color),
+                 stem_color = as.factor(stem_color),
+                 season = as.factor(season))
+
+## Recategorizacion
+
+hongos = hongos %>% 
+  mutate(gill_color = case_when(
+    gill_color == "e" | gill_color == "y" | gill_color == "o" | gill_color == "p" ~ "Calidos",
+    gill_color == "u" | gill_color == "r" ~ "Frios",
+    gill_color == "w" | gill_color == "g" | gill_color == "b" ~ "Claros",
+    gill_color == "n" | gill_color == "k" ~ "Oscuros",
+    gill_color == "f" ~ "Ninguno"),
+    gill_attachment = case_when(
+      gill_attachment == "a" | gill_attachment == "x"~ "Adjuntas",
+      gill_attachment == "s" | gill_attachment == "p" | gill_attachment == "u" ~ "Otros",
+      gill_attachment == "e"  ~ "Libre",
+      gill_attachment == "f" ~ "Ninguno",
+      gill_attachment == "d"~ "Decurrente"),
+    stem_color = case_when(
+      stem_color == "e" | stem_color == "y" | stem_color == "o" | stem_color == "p" ~ "Calidos",
+    stem_color == "u" | stem_color == "r" | stem_color == "l" ~ "Frios",
+    stem_color == "w" | stem_color == "g" | stem_color == "b" ~ "Claros",
+    stem_color == "n" | stem_color == "k" ~ "Oscuros",
+    stem_color == "f" ~ "Ninguno")
+      ,
+    cap_shape = case_when(
+      cap_shape == "f" ~ "Chato",
+      cap_shape == "s" ~ "Hundido",
+      cap_shape == "b" | cap_shape == "c" | cap_shape == "x" | cap_shape == "p" ~ "Redondeado",
+      cap_shape == "o" ~ "Otros"
+    ))
+
+```
+
+
+
+```{r, echo=FALSE, message=FALSE}
+# Extracción de la muestra
+set.seed(154)
+muestra <- hongos[sample(61069,250),]
+
+# Categorías de referencia
+muestra$cap_shape <- relevel(factor(muestra$cap_shape), "Redondeado")
+muestra$gill_color <- relevel(factor(muestra$gill_color), "Claros")
+muestra$stem_color <- relevel(factor(muestra$stem_color), "Claros")
+muestra$season <- relevel(factor(muestra$season), "a")
+
+```
+
+
+## Análisis descriptivo
+
+```{r, echo=FALSE, message=FALSE, fig.cap="Cantidad de hongos según categoría"}
+# Análisis descriptivo
+theme_set(theme_bw())
+
+ggplot(muestra) + 
+  aes(x = factor(class), fill = factor(class)) + 
+  geom_bar() +
+  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
+  scale_x_discrete(name = "Hongo", labels = c("Venenoso", "Comestible")) +
+  scale_y_continuous(breaks = seq(0, 150, 25)) +
+  labs(y = "Frecuencia") 
+
+
+
+```
+
+
+```{r, echo=FALSE, message=FALSE, fig.cap="Diámetro del sombrero según tipo de hongo"}
+
+muestra %>% 
+  #saco la observacion de 60 para que se vea bien los boxplots
+  filter(cap_diameter<50) %>% 
+ggplot() +
+  aes(y = cap_diameter, x = factor(class), color = factor(class)) +
+  geom_boxplot() + 
+  scale_x_discrete(name = "Hongo", labels = c("Venenoso", "Comestible")) + 
+  scale_y_continuous(name = "Diámetro") +
+  scale_color_manual(values = c("slateblue", "orangered"), guide = "none")
+
+```
+
+```{r, echo=FALSE, message=FALSE, fig.cap="Altura del tallo según tipo de hongo"}
+
+muestra %>% ggplot() +
+  aes(y = stem_height, x = factor(class), color = factor(class)) +
+  geom_boxplot() + 
+  scale_x_discrete(name = "Hongo", labels = c("Venenoso", "Comestible")) + 
+  scale_y_continuous(name = "Altura") +
+  scale_color_manual(values = c("slateblue", "orangered"), guide = "none")
+
+```
+
+```{r, echo=FALSE, message=FALSE, fig.cap="Ancho del tallo según tipo de hongo"}
+
+muestra %>% ggplot() +
+  aes(y = stem_width, x = factor(class), color = factor(class)) +
+  geom_boxplot() + 
+  scale_x_discrete(name = "Hongo", labels = c("Venenoso", "Comestible")) + 
+  scale_y_continuous(name = "Ancho") +
+  scale_color_manual(values = c("slateblue", "orangered"), guide = "none")
+
+```
+
+```{r, echo=FALSE, message=FALSE, fig.cap="Cantidad de hongos según la forma del sombrero"}
+
+# Barras apiladas
+
+muestra %>% group_by(cap_shape, class) %>% count() %>% 
+  ggplot() +
+  aes(x = cap_shape, fill = factor(class), y = n) +
+  geom_bar(position = "fill",  stat="identity") +
+  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
+  scale_x_discrete(name = "Sombrero", labels = c("b" = "campana", "c" = "cónico", "f" = "plano","x" = "convexo","s" = "hundido","o" = "otros", "p" = "esferico")) +
+  labs(y = "Frecuencia") 
+
+```
+
+```{r, echo=FALSE, message=FALSE, fig.cap="Cantidad de hongos según tipo de lámina"}
+
+muestra %>% group_by(gill_attachment, class) %>% count() %>% 
+  ggplot() +
+  aes(x = gill_attachment, fill = factor(class), y = n) +
+  geom_bar(position = "fill",  stat="identity") +
+  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
+  scale_x_discrete(name = "Láminas") +
+  labs(y = "Frecuencia relativa") 
+
+```
+
+```{r, echo=FALSE, message=FALSE, fig.cap="Cantidad de hongos según color de las láminas"}
+
+muestra %>% group_by(gill_color, class) %>% count() %>% 
+  ggplot() +
+  aes(x = gill_color, fill = factor(class), y = n) +
+  geom_bar(position = "fill",  stat="identity") +
+  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
+  scale_x_discrete(name = "Colores") +
+  labs(y = "Frecuencia relativa") 
+
+```
+
+```{r, echo=FALSE, message=FALSE, fig.cap="Cantidad de hongos según color del tallo"}
+
+muestra %>% group_by(stem_color, class) %>% count() %>% 
+  ggplot() +
+  aes(x = stem_color, fill = factor(class), y = n) +
+  geom_bar(position = "fill",  stat="identity") +
+  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
+  scale_x_discrete(name = "Colores") +
+  labs(y = "Frecuencia relativa") 
+
+```
+
+```{r, echo=FALSE, message=FALSE, fig.cap="Cantidad de hongos según color de las láminas"}
+
+muestra %>% group_by(season, class) %>% count() %>% 
+  ggplot() +
+  aes(x = season, fill = factor(class), y = n) +
+  geom_bar(position = "fill",  stat="identity") +
+  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
+  scale_x_discrete(name = "Colores") +
+  labs(y = "Frecuencia relativa") 
+
+```
+
+# Selección de variables
+
+Se tienen muchas variables que pueden llegar a considerarse para el análisis, pero se busca aquellas que puedan significar un cambio en la supervivencia de los pacientes al construir un modelo. Para ello se observa qué variable en forma marginal produce hay un cambio significativo de la supervivencia de los pacientes en un modelo de razón de hazards proporcionales de Cox.
+
+```{r, echo=FALSE, message=FALSE}
+
+
+# Seleccion de modelo
+set.seed(245)
+
+
+# ¿Cuáles variable son significativas?
+mod_int <- glm(class ~ 1, family = binomial(link = "logit"), 
+                     data = muestra)
+mod_diam <- glm(class ~ cap_diameter, family = binomial(link = "logit"),
+                data = muestra)
+mod_shape <- glm(class ~ cap_shape, family = binomial(link = "logit"),
+                data = muestra)
+mod_gattch <- glm(class ~ gill_attachment, family = binomial(link = "logit"),
+                data = muestra)
+mod_gcolor <- glm(class ~ gill_color, family = binomial(link = "logit"),
+                data = muestra)
+mod_sheight <- glm(class ~ stem_height, family = binomial(link = "logit"),
+                data = muestra)
+mod_swidth <- glm(class ~ stem_width, family = binomial(link = "logit"),
+                data = muestra)
+mod_scolor <- glm(class ~ stem_color, family = binomial(link = "logit"),
+                data = muestra)
+mod_season <- glm(class ~ season, family = binomial(link = "logit"),
+                data = muestra)
+
+# Nivel de significacion =  0.1
+
+  # Significativa
+a1 = anova(mod_int, mod_diam, test = "LRT")  # Significativa
+a2 = anova(mod_int, mod_shape, test = "LRT") # Significativa
+a3 = anova(mod_int, mod_gattch, test = "LRT") 
+a4 = anova(mod_int, mod_gcolor, test = "LRT") 
+a5 = anova(mod_int, mod_sheight, test = "LRT") 
+a7 = anova(mod_int, mod_swidth, test = "LRT") 
+a6 = anova(mod_int, mod_scolor, test = "LRT") # Significativa
+a8 = anova(mod_int, mod_season, test = "LRT") # Significativa
+
+```
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|l|l|l|l|}
+\hline
+\textbf{Variables}& \textbf{gl} & $\boldsymbol{G}^2$ & \textbf{p-value} \\ \hline
+Diámetro del sombrero & 1  &  `r round(a1$Deviance[2],3)` & \textcolor{ForestGreen}{`r round(a1[2,5], 3)`}     \\ \hline
+Altura del tallo  & 1  & `r round(a5$Deviance[2],3)`     & \textcolor{red}{`r round(a5[2,5], 3)`}       \\ \hline
+Ancho del tallo & 1  & `r round(a7$Deviance[2],3)`     & \textcolor{red}{`r round(a7[2,5], 3)`}     \\ \hline
+Forma del sombrero  & 3  & `r round(a2$Deviance[2],3)`     & \textcolor{ForestGreen}{`r round(a2[2,5], 3)`}      \\ \hline
+Tipo de lámina & 4  & `r round(a3$Deviance[2],3)`     & \textcolor{red}{`r round(a3[2,5], 3)`}    \\ \hline
+Color de las láminas    & 4  & `r round(a4$Deviance[2],3)`   & \textcolor{red}{`r round(a4[2,5], 3)`}      \\ \hline
+Color del tallo  & 4  & `r round(a6$Deviance[2],3)`    & \textcolor{ForestGreen}{<0.001}      \\ \hline
+Temporada & 3  & `r round(a8$Deviance[2],3)`    & \textcolor{ForestGreen}{`r round(a8[2,5], 3)`}     \\ \hline
+\end{tabular}\caption{Modelos marginales}
+\label{table:1}
+\end{center}
+\end{table}
+
