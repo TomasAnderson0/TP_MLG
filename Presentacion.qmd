@@ -58,6 +58,7 @@ library(tidyverse)
 library(ggplot2)
 library(ResourceSelection)
 library(gridExtra)
+library(pROC)
 
 # ---Datos---
 data_original <- read_delim("secondary_data.csv", 
@@ -106,7 +107,16 @@ hongos = hongos %>%
       cap_shape == "s" ~ "Hundido",
       cap_shape == "b" | cap_shape == "c" | cap_shape == "x" | cap_shape == "p" ~ "Redondeado",
       cap_shape == "o" ~ "Otros"
-    ))
+    ),
+    season = case_when(
+      season == "s" ~ "Primavera",
+      season == "a" ~ "Otoño",
+      season == "u" ~ "Verano",
+      season == "w" ~ "Invierno"
+    )) %>% mutate(gill_attachment = factor(gill_attachment, levels = c("Adjuntas", "Libre", "Decurrente","Otros", "Ninguno")),
+                  gill_color = factor(gill_color, levels = c("Calidos", "Claros", "Ninguno","Frios", "Oscuros")),
+                  stem_color = factor(stem_color, levels = c("Calidos", "Claros", "Ninguno","Frios", "Oscuros")),
+                  season = factor(season, levels = c("Primavera", "Verano", "Otoño", "Invierno")))
 
 # Extracción de la muestra
 set.seed(154)
@@ -116,7 +126,7 @@ muestra <- hongos[sample(61069,250),]
 muestra$cap_shape <- relevel(factor(muestra$cap_shape), "Redondeado")
 muestra$gill_color <- relevel(factor(muestra$gill_color), "Claros")
 muestra$stem_color <- relevel(factor(muestra$stem_color), "Claros")
-muestra$season <- relevel(factor(muestra$season), "a")
+muestra$season <- relevel(factor(muestra$season), "Primavera")
 
 ```
 
@@ -147,14 +157,15 @@ Como primera medida se decide realizar un analisis descriptivo de los datos para
 # Análisis descriptivo
 theme_set(theme_bw())
 
-plot1 = ggplot(muestra) + 
-  aes(x = factor(class), fill = factor(class)) + 
-  geom_bar() +
-  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
-  scale_x_discrete(name = "Hongo", labels = c("Venenoso", "Comestible")) +
+plot1 = muestra %>% group_by(class) %>% count() %>% ggplot() + 
+  aes(x = T,fill = factor(class), y = n) + 
+  geom_bar(position = "fill",  stat="identity") +
+  scale_fill_manual(values = c("#ba28f0", "#dcc382"), guide = "none") +
+  scale_x_discrete(name = "", label = "") +
   scale_y_continuous(breaks = seq(0, 150, 25)) +
-  labs(y = "Frecuencia") 
-
+  labs(y = "Frecuencia relativa") + 
+  geom_text(aes(y = .75, x = 1, label = "Venenosos")) +
+  geom_text(aes(y = .25, x = 1, label = "Comestibles"))
 ```
 
 
@@ -203,8 +214,8 @@ plot5 = muestra %>% group_by(cap_shape, class) %>% count() %>%
   aes(x = cap_shape, fill = factor(class), y = n) +
   geom_bar(position = "fill",  stat="identity") +
   scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
-  scale_x_discrete(name = "Sombrero", labels = c("b" = "campana", "c" = "cónico", "f" = "plano","x" = "convexo","s" = "hundido","o" = "otros", "p" = "esferico")) +
-  labs(y = "Frecuencia relativa") 
+  scale_x_discrete(name = "", labels = c("b" = "campana", "c" = "cónico", "f" = "plano","x" = "convexo","s" = "hundido","o" = "otros", "p" = "esferico")) +
+  labs(y = "Frecuencia relativa", title = "Forma del sombrero") + theme(axis.text.x = element_text(size = 8))
 
 ```
 
@@ -215,8 +226,8 @@ plot6 = muestra %>% group_by(gill_attachment, class) %>% count() %>%
   aes(x = gill_attachment, fill = factor(class), y = n) +
   geom_bar(position = "fill",  stat="identity") +
   scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
-  scale_x_discrete(name = "Láminas") +
-  labs(y = "Frecuencia relativa") 
+  scale_x_discrete(name = "") +
+  labs(y = "Frecuencia relativa", title = "Tipo de lámina") + theme(axis.text.x = element_text(size = 8))
 
 ```
 
@@ -227,8 +238,8 @@ plot7 = muestra %>% group_by(gill_color, class) %>% count() %>%
   aes(x = gill_color, fill = factor(class), y = n) +
   geom_bar(position = "fill",  stat="identity") +
   scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
-  scale_x_discrete(name = "Colores") +
-  labs(y = "Frecuencia relativa") 
+  scale_x_discrete(name = "") +
+  labs(y = "Frecuencia relativa", title = "Color de lámina") + theme(axis.text.x = element_text(size = 8))
 
 ```
 
@@ -239,8 +250,8 @@ plot8 = muestra %>% group_by(stem_color, class) %>% count() %>%
   aes(x = stem_color, fill = factor(class), y = n) +
   geom_bar(position = "fill",  stat="identity") +
   scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
-  scale_x_discrete(name = "Colores") +
-  labs(y = "Frecuencia relativa") 
+  scale_x_discrete(name = "") +
+  labs(y = "Frecuencia relativa", title = "Color del tallo") + theme(axis.text.x = element_text(size = 8))
 
 ```
 
@@ -251,20 +262,24 @@ plot9 = muestra %>% group_by(season, class) %>% count() %>%
   aes(x = season, fill = factor(class), y = n) +
   geom_bar(position = "fill",  stat="identity") +
   scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
-  scale_x_discrete(name = "Colores") +
-  labs(y = "Frecuencia relativa") 
+  scale_x_discrete(name = "") +
+  labs(y = "Frecuencia relativa", title = "Temporada") 
 
 ```
 
 
 ```{r, echo=FALSE}
-grid.arrange(plot1, plot2, plot3, plot4)
+grid.arrange(plot1, plot2, plot3, plot4) 
 ```
 
 
 ```{r, echo=FALSE}
 grid.arrange(plot5, plot6, plot7, plot8)
 ```
+```{r, echo=FALSE}
+grid.arrange(plot9, nrow = 2, ncol = 2)
+```
+
 
 
 
@@ -693,9 +708,17 @@ ic_oscuros <- c(exp(-1.26587)-1.96*0.35123, exp(-1.26587)+1.96*0.35123)
 
 ## Prediccion y capacidad predictiva
 
-```{r, message=FALSE, echo=FALSE}
+```{r, message=FALSE, echo=FALSE, warning=FALSE}
 par(pty = "s") # Para que grafique sólo en el (0;1)
-asd1 = pROC::roc(muestra$class, fitted(mod_sin_season), plot = TRUE,
+ggroc(roc(muestra$class, fitted(mod_sin_season)), col = "olivedrab2") + 
+  geom_abline(slope = 1, intercept = 1) + 
+  geom_text(aes(x = .35, y = .5, label = "AUC: 0.719"), size = 2.5, color = "steelblue") +
+  geom_point(aes(x = 0.755, y = .577)) +
+  geom_text(aes(x = 0.60, y = .55, label = "0.518 (0.755, 0.577)"), size = 2.5, color = "steelblue") +
+  labs(x = "1 - Especificidad", y = "Sensibilidad", title = "Curva ROC")
+ 
+
+asd1 = pROC::roc(muestra$class, fitted(mod_sin_season), plot = F,
     ylab = "Sensibilidad", 
     xlab = "1 - Especificidad", xaxt = "n",
     main = "Curva ROC",
