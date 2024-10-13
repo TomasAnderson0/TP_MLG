@@ -134,7 +134,19 @@ muestra$season <- relevel(factor(muestra$season), "Primavera")
 
 ## Introducción 
 
-Introducir lore para los hongos locos
+Se estima que existen entre 2 a 4 millones de hongos en el mundo de los cuales la ciencia a logrado describir solo una pequeña porción de estos. Los hongos de mayor tamaño a veces pueden ser venenosos y otros pueden llegar a ser comestibles. Por ello, es esencial poder distinguir entre estos para evitar posibles inconvenientes que pueden ir desde malestar hasta la muerte.
+
+La estadística nos puede ayudar a estimar cuáles pueden llegar a ser las principales diferencias entre las características observables de los hongos comestibles y venenosos además de la temporada en la que suele crecer. Para ello se cuenta con un conjunto de datos de 250 hongos clasificados en comestibles o venenosas con 8 variables. Estas son:
+
+- Diámetro del sombrero
+- Altura del tallo
+- Ancho del tallo
+- Forma del sombrero
+- Tipo de lámina
+- Color de las láminas
+- Color del tallo
+- Temporada
+
 
 
 ## Objetivos
