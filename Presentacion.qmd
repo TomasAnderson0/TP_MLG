@@ -161,11 +161,10 @@ plot1 = muestra %>% group_by(class) %>% count() %>% ggplot() +
   aes(x = T,fill = factor(class), y = n) + 
   geom_bar(position = "fill",  stat="identity") +
   scale_fill_manual(values = c("#ba28f0", "#dcc382"), guide = "none") +
-  scale_x_discrete(name = "", label = "") +
-  scale_y_continuous(breaks = seq(0, 150, 25)) +
-  labs(y = "Frecuencia relativa") + 
-  geom_text(aes(y = .75, x = 1, label = "Venenosos")) +
-  geom_text(aes(y = .25, x = 1, label = "Comestibles"))
+  scale_x_discrete(name = "Hongo", label = "") +
+  labs(y = "Frecuencia relativa", title = "Clasificación de los hongos") + 
+  geom_text(aes(y = .70, x = 1, label = "Venenosos"), size = 2.5) +
+  geom_text(aes(y = .20, x = 1, label = "Comestibles"), size = 2.5) + coord_flip()
 ```
 
 
@@ -179,6 +178,7 @@ ggplot() +
   geom_boxplot() + 
   scale_x_discrete(name = "Hongo", labels = c("Venenoso", "Comestible")) + 
   scale_y_continuous(name = "Diámetro") +
+  labs(title = "Diametro del sombrero") +
   scale_color_manual(values = c("slateblue", "orangered"), guide = "none")
 
 ```
@@ -190,6 +190,7 @@ plot3 = muestra %>% ggplot() +
   geom_boxplot() + 
   scale_x_discrete(name = "Hongo", labels = c("Venenoso", "Comestible")) + 
   scale_y_continuous(name = "Altura") +
+  labs(title = "Altura del tallo") +
   scale_color_manual(values = c("slateblue", "orangered"), guide = "none")
 
 ```
@@ -201,6 +202,7 @@ plot4 = muestra %>% ggplot() +
   geom_boxplot() + 
   scale_x_discrete(name = "Hongo", labels = c("Venenoso", "Comestible")) + 
   scale_y_continuous(name = "Ancho") +
+  labs(title = "Ancho del tallo") +
   scale_color_manual(values = c("slateblue", "orangered"), guide = "none")
 
 ```
@@ -285,7 +287,7 @@ grid.arrange(plot9, nrow = 2, ncol = 2)
 
 ## Selección de variables
 
-Se tienen muchas variables que pueden llegar a considerarse para el análisis, pero se busca aquellas que puedan significar un cambio en la supervivencia de los pacientes al construir un modelo. Para ello se observa qué variable en forma marginal produce hay un cambio significativo de la supervivencia de los pacientes en un modelo de razón de hazards proporcionales de Cox.
+Se tienen muchas variables que pueden llegar a considerarse para el análisis, pero se busca aquellas que aporten en la discriminación de los hongos al construir un modelo. Para ello se observa qué variable en forma marginal produce un cambio significativo en la explicación de si un hongo es comestible o no.
 
 ```{r, echo=FALSE, message=FALSE}
 
@@ -332,7 +334,7 @@ a8 = anova(mod_int, mod_season, test = "LRT") # Significativa
 \begin{center}
 \begin{tabular}{|l|l|l|l|}
 \hline
-\textbf{Variables}& \textbf{gl} & $\boldsymbol{G}^2$ & \textbf{p-value} \\ \hline
+\textbf{Variables}& \textbf{gl} & $\boldsymbol{D}$ & \textbf{p-value} \\ \hline
 Diámetro del sombrero & 1  &  `r round(a1$Deviance[2],3)` & \textcolor{ForestGreen}{`r round(a1[2,5], 3)`}     \\ \hline
 Altura del tallo  & 1  & `r round(a5$Deviance[2],3)`     & \textcolor{red}{`r round(a5[2,5], 3)`}       \\ \hline
 Ancho del tallo & 1  & `r round(a7$Deviance[2],3)`     & \textcolor{red}{`r round(a7[2,5], 3)`}     \\ \hline
@@ -388,12 +390,12 @@ Coso Coso se propone el modelo con todas las que resultaron significativas y cos
 \begin{center}
 \begin{tabular}{|l|l|l|l|}
 \hline
-\textbf{Modelo}& \textbf{gl} & $\boldsymbol{G}^2$ & \textbf{p-value} \\ \hline
+\textbf{Modelo}& \textbf{gl} & $\boldsymbol{D}$ & \textbf{p-value} \\ \hline
 Sin diámetro del sombrero & 1  &  `r round(a9$Deviance[2],3)` & \textcolor{ForestGreen}{`r round(a9[2,5], 3)`}     \\ \hline
 Sin forma del sombrero & 3  & `r round(a10$Deviance[2],3)`     & \textcolor{ForestGreen}{`r round(a10[2,5], 3)`}    \\ \hline
 Sin color de las láminas    & 4  & `r round(a11$Deviance[2],3)`   & \textcolor{ForestGreen}{`r round(a11[2,5], 3)`}      \\ \hline
 Sin temporada & 3  & `r round(a12$Deviance[2],3)`    & \textcolor{red}{`r round(a12[2,5], 3)+0.001`}     \\ \hline
-\end{tabular}\caption{Modelos marginales}
+\end{tabular}\caption{Modelos con las variables marginales}
 \label{table:1}
 \end{center}
 \end{table}
@@ -436,12 +438,12 @@ a16 = anova(mod_sin_season, mod_6, test = "LRT")
 \begin{center}
 \begin{tabular}{|l|l|l|l|}
 \hline
-\textbf{Modelo}& \textbf{gl} & $\boldsymbol{G}^2$ & \textbf{p-value} \\ \hline
+\textbf{Modelo}& \textbf{gl} & $\boldsymbol{D}$ & \textbf{p-value} \\ \hline
 Añadir tipo de lámina & 4  &  `r round(a13$Deviance[2],3)` & \textcolor{red}{`r round(a13[2,5], 3)`}     \\ \hline
 Añadir color de las láminas  & 4  & `r round(a14$Deviance[2],3)`     & \textcolor{red}{`r round(a14[2,5], 3)`}    \\ \hline
 Añadir altura del tallo  & 1  & `r round(a15$Deviance[2],3)`   & \textcolor{red}{`r round(a15[2,5], 3)`}      \\ \hline
 Añadir ancho del tallo & 1  & `r round(a16$Deviance[2],3)`    & \textcolor{red}{`r round(a16[2,5], 3)`}     \\ \hline
-\end{tabular}\caption{Modelos marginales}
+\end{tabular}\caption{Modelos con las variables marginales no significativas}
 \label{table:1}
 \end{center}
 \end{table}
@@ -477,11 +479,11 @@ mod_sin_season_loglog <- glm(class ~ cap_diameter + cap_shape + stem_color,
 \begin{center}
 \begin{tabular}{|l|l|l|l|}
 \hline
-\textbf{Modelo}& \textbf{gl} & $\boldsymbol{G}^2$ & \textbf{p-value} \\ \hline
+\textbf{Modelo}& \textbf{gl} & $\boldsymbol{D}$ & \textbf{p-value} \\ \hline
 Diámetro del sombrero x Forma del sombrero & 3  &  `r round(a17$Deviance[2],3)` & \textcolor{red}{`r round(a17[2,5], 3)`}     \\ \hline
 Diámetro del sombrero x Color de las láminas & 8  & `r round(a18$Deviance[2],3)`     & \textcolor{red}{`r round(a18[2,5], 3)`}    \\ \hline
 Forma del sombrero x Color de las láminas    & 4  & `r round(a19$Deviance[2],3)`   & \textcolor{red}{`r round(a19[2,5], 3)`}      \\ \hline
-\end{tabular}\caption{Modelos marginales}
+\end{tabular}\caption{Modelos con las interacciones}
 \label{table:1}
 \end{center}
 \end{table}
@@ -538,8 +540,9 @@ G1 <- ggplot(muestra, aes(y = rQ.logit, x = fitted(mod_sin_season))) +
   geom_hline(yintercept = 0) + ylim(-3, 3) + 
   geom_hline(yintercept = -3, linetype = "dashed") + 
   geom_hline(yintercept =  3, linetype = "dashed") +
-  labs(title = "Gráfico de residuos cuantil vs. las probabilidades estimadas", 
-       x = expression(hat(pi)), y = "Residuos cuantil")
+  labs(title = "Gráfico de residuos cuantil \nvs. probabilidades estimadas", 
+       x = expression(hat(pi)), y = "Residuos cuantil") + 
+  theme(title = element_text(size = 10))
 
 
 
@@ -552,8 +555,9 @@ G1 <- ggplot(muestra, aes(y = rQ.logit, x = fitted(mod_sin_season))) +
 G2 <- ggplot(muestra[1:100,], aes(sample = rQ.logit[1:100])) +
   stat_qq(distribution = qnorm, fill = "olivedrab2", shape = 21, size = 3) +
   stat_qq_line() +
-  labs(title = "Gráfico probabilístico normal con residuos cuantil",  
-       x = "Cuantiles teóricos", y = "Cuantiles de los residuos cuantil")
+  labs(title = "Gráfico probabilístico normal\n con residuos cuantil",  
+       x = "Cuantiles teóricos", y = "Cuantiles de los residuos cuantil") + 
+  theme(title = element_text(size = 10))
 
 grid.arrange(G1,G2, nrow = 1)
 
@@ -571,8 +575,9 @@ G3 <- ggplot(muestra, aes(y = rQ.probit, x = fitted(mod_sin_season_probit))) +
   geom_hline(yintercept = 0) + ylim(-3, 3) + 
   geom_hline(yintercept = -3, linetype = "dashed") + 
   geom_hline(yintercept =  3, linetype = "dashed") +
-  labs(title = "Gráfico de residuos cuantil vs. las probabilidades estimadas", 
-       x = expression(hat(pi)), y = "Residuos cuantil")
+  labs(title = "Gráfico de residuos cuantil \nvs. probabilidades estimadas", 
+       x = expression(hat(pi)), y = "Residuos cuantil") + 
+  theme(title = element_text(size = 10))
 
 
 
@@ -585,8 +590,9 @@ G3 <- ggplot(muestra, aes(y = rQ.probit, x = fitted(mod_sin_season_probit))) +
 G4 <- ggplot(muestra[1:100,], aes(sample = rQ.probit[1:100])) +
   stat_qq(distribution = qnorm, fill = "olivedrab2", shape = 21, size = 3) +
   stat_qq_line() +
-  labs(title = "Gráfico probabilístico normal con residuos cuantil",  
-       x = "Cuantiles teóricos", y = "Cuantiles de los residuos cuantil")
+  labs(title = "Gráfico probabilístico normal\ncon residuos cuantil",  
+       x = "Cuantiles teóricos", y = "Cuantiles de los residuos cuantil") + 
+  theme(title = element_text(size = 10))
 
 grid.arrange(G3,G4, nrow = 1)
 
@@ -604,8 +610,9 @@ G5 <- ggplot(muestra, aes(y = rQ.loglog, x = fitted(mod_sin_season_loglog))) +
   geom_hline(yintercept = 0) + ylim(-3, 3) + 
   geom_hline(yintercept = -3, linetype = "dashed") + 
   geom_hline(yintercept =  3, linetype = "dashed") +
-  labs(title = "Gráfico de residuos cuantil vs. las probabilidades estimadas", 
-       x = expression(hat(pi)), y = "Residuos cuantil")
+  labs(title = "Gráfico de residuos cuantil \nvs. probabilidades estimadas", 
+       x = expression(hat(pi)), y = "Residuos cuantil") + 
+  theme(title = element_text(size = 10))
 
 
 
@@ -618,8 +625,9 @@ G5 <- ggplot(muestra, aes(y = rQ.loglog, x = fitted(mod_sin_season_loglog))) +
 G6 <- ggplot(muestra[1:100,], aes(sample = rQ.loglog[1:100])) +
   stat_qq(distribution = qnorm, fill = "olivedrab2", shape = 21, size = 3) +
   stat_qq_line() +
-  labs(title = "Gráfico probabilístico normal con residuos cuantil",  
-       x = "Cuantiles teóricos", y = "Cuantiles de los residuos cuantil")
+  labs(title = "Gráfico probabilístico normal\ncon residuos cuantil",  
+       x = "Cuantiles teóricos", y = "Cuantiles de los residuos cuantil") + 
+  theme(title = element_text(size = 10))
 
 grid.arrange(G5,G6, nrow = 1)
 
@@ -708,6 +716,8 @@ ic_oscuros <- c(exp(-1.26587)-1.96*0.35123, exp(-1.26587)+1.96*0.35123)
 
 ## Prediccion y capacidad predictiva
 
+Para ver una medida de la capacidad predictiva del modelo se grafica una curva ROC y se observan las predicciones con el punto de corte optimo.
+
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 par(pty = "s") # Para que grafique sólo en el (0;1)
 ggroc(roc(muestra$class, fitted(mod_sin_season)), col = "olivedrab2") + 
@@ -716,20 +726,9 @@ ggroc(roc(muestra$class, fitted(mod_sin_season)), col = "olivedrab2") +
   geom_point(aes(x = 0.755, y = .577)) +
   geom_text(aes(x = 0.60, y = .55, label = "0.518 (0.755, 0.577)"), size = 2.5, color = "steelblue") +
   labs(x = "1 - Especificidad", y = "Sensibilidad", title = "Curva ROC")
- 
 
-asd1 = pROC::roc(muestra$class, fitted(mod_sin_season), plot = F,
-    ylab = "Sensibilidad", 
-    xlab = "1 - Especificidad", xaxt = "n",
-    main = "Curva ROC",
-    print.thres = T, # Imprimir el punto de corte (con las coord de
-    # sensibilidad y 1-especificidad)
-    print.thres.col = "black", 
-    print.thres.cex=0.8,
-    print.auc = T, #  Imprimir área bajo la curva
-    col = "olivedrab2", 
-    lwd = 4)
 ```
+El punto de corte que maximiza la sensibilidad, la especificidad y la precision global es el 0.518 y el area bajo la curva es de 0.719.
 
 
 ```{r, echo=FALSE}
@@ -740,13 +739,17 @@ y_pred <- factor(ifelse(fitted(mod_sin_season
 asd = caret::confusionMatrix(data = y_pred, reference = y_obs, positive = "Comestible")
 ```
 
+Bajo este punto de corte, la matriz de confusión es la siguiente:
 
 \begin{table}[H]
 \begin{tabular}{|ll|ll|}
 \hline
-\multicolumn{2}{|l|}{}            & \multicolumn{2}{l|}{Real}                    \\ \hline
-\multicolumn{2}{|l|}{Prediccion}  & \multicolumn{1}{l|}{Venenosos} & Comestibles \\ \hline
+\multicolumn{2}{|l|}{}            & \multicolumn{2}{c|}{Observado}                    \\ \hline
+\multicolumn{2}{|l|}{Predicho}  & \multicolumn{1}{l|}{Venenosos} & Comestibles \\ \hline
 \multicolumn{2}{|l|}{Venenosos}   & \multicolumn{1}{l|}{`r asd[[2]][1]`}        & `r asd[[2]][3]`          \\ \hline
 \multicolumn{2}{|l|}{Comestibles} & \multicolumn{1}{l|}{`r asd[[2]][2]` }        & `r asd[[2]][4]`          \\ \hline
 \end{tabular}
 \end{table}
+
+Se tiene una precisión global de `r asd[[3]][1]`, una especificadad de `r round(asd[[4]][2],3)` y una sensibilidad de `r round(asd[[4]][1],3)`.
+
