@@ -139,7 +139,7 @@ Introducir lore para los hongos locos
 
 ## Objetivos
 
-Conseguir un modelo lineal generalizado para predecir si los hongos son venenosos o no
+Conseguir un modelo lineal generalizado de regresion logistica para predecir si los hongos son comestibles o no.
 
 
 
@@ -150,10 +150,10 @@ Conseguir un modelo lineal generalizado para predecir si los hongos son venenoso
 
 ## Análisis descriptivo
 
-Como primera medida se decide realizar un analisis descriptivo de los datos para ver como se comporta la distribucion de los hongos en las variables explicativas.
 
+Primero, se muestra la distribución de si el hongo es comestible.
 
-```{r, echo=FALSE, message=FALSE, fig.cap="Cantidad de hongos según categoría"}
+```{r, echo=FALSE, message=FALSE, fig.cap="Cantidad de hongos según categoría", fig.height=3, fig.width=5}
 # Análisis descriptivo
 theme_set(theme_bw())
 
@@ -165,7 +165,17 @@ plot1 = muestra %>% group_by(class) %>% count() %>% ggplot() +
   labs(y = "Frecuencia relativa", title = "Clasificación de los hongos") + 
   geom_text(aes(y = .70, x = 1, label = "Venenosos"), size = 2.5) +
   geom_text(aes(y = .20, x = 1, label = "Comestibles"), size = 2.5) + coord_flip()
+
+plot1
 ```
+
+
+En la muestra, el 44.4% de los hongos son comestibles mientras que el resto son venenosos.
+
+
+
+Luego se grafican las variables explicativas según si el hongo es comestible o no.
+
 
 
 ```{r, echo=FALSE, message=FALSE, fig.cap="Diámetro del sombrero según tipo de hongo"}
@@ -270,19 +280,24 @@ plot9 = muestra %>% group_by(season, class) %>% count() %>%
 ```
 
 
-```{r, echo=FALSE}
-grid.arrange(plot1, plot2, plot3, plot4) 
+```{r, echo=FALSE, message=FALSE, fig.cap="Variables explicativas vs Tipo de hongo"}
+grid.arrange(plot2, plot3, plot4, plot9) 
 ```
+La distribución de la altura y el ancho del tallo,y el diametro del sombrero parecen ser parecidas para ambos tipos de hongos. Hay algunas observaciones atipicas en dichas variables que podrian afectar negativamente al momento de plantear un modelo. La temporada con menor porcentaje de hongos comestibles es el verano, con un `r round(100*abs(sum(muestra$class[muestra$season == "Verano"]))/length(muestra$class[muestra$season == "Verano"]),2)`%.
 
-
-```{r, echo=FALSE}
+```{r, echo=FALSE, message=FALSE, fig.cap="Variables explicativas vs Tipo de hongo"}
 grid.arrange(plot5, plot6, plot7, plot8)
 ```
-```{r, echo=FALSE}
-grid.arrange(plot9, nrow = 2, ncol = 2)
-```
+ 
+Para la forma del sombrero, la categoria que tiene el mayor porcentaje de hongos comestibles es la chata con el `r round(100*abs(sum(muestra$class[muestra$cap_shape == "Chato"]))/length(muestra$class[muestra$cap_shape == "Chato"]),2)`% y la menor es otros con el `r round(100*abs(sum(muestra$class[muestra$cap_shape=="Otros"]))/length(muestra$class[muestra$cap_shape == "Otros"]),2)`%.
+
+Para el tipo de lamina, la categoria que tiene el mayor porcentaje de hongos comestibles es la libre con el `r round(100*abs(sum(muestra$class[muestra$gill_attachment == "Libre"]))/length(muestra$class[muestra$gill_attachment == "Libre"]),2)`% y la menor es ninguno con el `r round(100*abs(sum(muestra$class[muestra$gill_attachment=="Ninguno"]))/length(muestra$class[muestra$gill_attachment == "Ninguno"]),2)`%.
+
+Para el color de lamina, la categoria que tiene el mayor porcentaje de hongos comestibles es claros con el `r round(100*abs(sum(muestra$class[muestra$gill_color == "Claros"]))/length(muestra$class[muestra$gill_color == "Claros"]),2)`% y la menor es ninguno con el `r round(100*abs(sum(muestra$class[muestra$gill_color=="Ninguno"]))/length(muestra$class[muestra$gill_color == "Ninguno"]),2)`%.
 
 
+Para el color del tallo, la categoria que tiene el mayor porcentaje de hongos comestibles es claros con el `r round(100*abs(sum(muestra$class[muestra$stem_color == "Claros"]))/length(muestra$class[muestra$stem_color == "Claros"]),2)`% y la menor es ninguno con el `r round(100*abs(sum(muestra$class[muestra$stem_color=="Ninguno"]))/length(muestra$class[muestra$stem_color == "Ninguno"]),2)`%.
+  
 
 
 ## Selección de variables
@@ -381,9 +396,7 @@ a11 = anova(mod_sin_scolor, mod_1, test = "LRT")
 a12 = anova(mod_sin_season, mod_1, test = "LRT") # p-v = 0.05, el beta asoc. a season es 0
 ```
 
-Coso Coso se propone el modelo con todas las que resultaron significativas y coso
-
-
+Se encontraron significativas a el diametro del sombrero, la forma de sombrero, el color de tallo y la temporada, por lo que se plantea un modelo con todas incluidas y se quitan todas las que no aporten significativamente a la explicacion.
 
 
 \begin{table}[H]
@@ -433,6 +446,9 @@ a16 = anova(mod_sin_season, mod_6, test = "LRT")
 
 ```
 
+Se elimana la temporada del modelo y se prueba incluir las demas variables explicativas que no se incluyeron al principio.
+
+
 
 \begin{table}[H]
 \begin{center}
@@ -447,6 +463,7 @@ Añadir ancho del tallo & 1  & `r round(a16$Deviance[2],3)`    & \textcolor{red}
 \label{table:1}
 \end{center}
 \end{table}
+
 
 
 ```{r, echo=FALSE}
@@ -473,7 +490,7 @@ mod_sin_season_loglog <- glm(class ~ cap_diameter + cap_shape + stem_color,
                       data = muestra)
 
 ```
-
+No se incorpora ninguna variable nueva, por lo que se pasa a probar las interacciones.
 
 \begin{table}[H]
 \begin{center}
@@ -487,6 +504,12 @@ Forma del sombrero x Color de las láminas    & 4  & `r round(a19$Deviance[2],3)
 \label{table:1}
 \end{center}
 \end{table}
+
+Ninguna interaccion es significativa por lo que el modelo a utilizar es el siguiente:
+
+
+Introducir modelo
+
 
 
 Una vez elegido el modelo, se prueba si se debe o no añadir las variables cuantitativas de forma lineal o no. Se divide VARIABLE en CATEGORIAS y bla bla.
