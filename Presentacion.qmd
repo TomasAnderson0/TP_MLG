@@ -175,7 +175,7 @@ theme_set(theme_bw())
 plot1 = muestra %>% group_by(class) %>% count() %>% ggplot() + 
   aes(x = T,fill = factor(class), y = n) + 
   geom_bar(position = "fill",  stat="identity") +
-  scale_fill_manual(values = c("#ba28f0", "#dcc382"), guide = "none") +
+  scale_fill_manual(values = c("#6B1D6B", "#FC814A"), guide = "none") +
   scale_x_discrete(name = "Hongo", label = "") +
   labs(y = "Frecuencia relativa", title = "Clasificación de los hongos") + 
   geom_text(aes(y = .70, x = 1, label = "Venenosos"), size = 2.5) +
@@ -204,7 +204,7 @@ ggplot() +
   scale_x_discrete(name = "Hongo", labels = c("Venenoso", "Comestible")) + 
   scale_y_continuous(name = "Diámetro") +
   labs(title = "Diámetro del sombrero") +
-  scale_color_manual(values = c("slateblue", "orangered"), guide = "none")
+  scale_color_manual(values = c("#6B1D6B", "#FC814A"), guide = "none")
 
 ```
 
@@ -216,7 +216,7 @@ plot3 = muestra %>% ggplot() +
   scale_x_discrete(name = "Hongo", labels = c("Venenoso", "Comestible")) + 
   scale_y_continuous(name = "Altura") +
   labs(title = "Altura del tallo") +
-  scale_color_manual(values = c("slateblue", "orangered"), guide = "none")
+  scale_color_manual(values = c("#6B1D6B", "#FC814A"), guide = "none")
 
 ```
 
@@ -228,7 +228,7 @@ plot4 = muestra %>% ggplot() +
   scale_x_discrete(name = "Hongo", labels = c("Venenoso", "Comestible")) + 
   scale_y_continuous(name = "Ancho") +
   labs(title = "Ancho del tallo") +
-  scale_color_manual(values = c("slateblue", "orangered"), guide = "none")
+  scale_color_manual(values = c("#6B1D6B", "#FC814A"), guide = "none")
 
 ```
 
@@ -240,7 +240,7 @@ plot5 = muestra %>% group_by(cap_shape, class) %>% count() %>%
   ggplot() +
   aes(x = cap_shape, fill = factor(class), y = n) +
   geom_bar(position = "fill",  stat="identity") +
-  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
+  scale_fill_manual(values = c("#6B1D6B", "#FC814A"), guide = "none") +
   scale_x_discrete(name = "", labels = c("b" = "campana", "c" = "cónico", "f" = "plano","x" = "convexo","s" = "hundido","o" = "otros", "p" = "esferico")) +
   labs(y = "Frecuencia relativa", title = "Forma del sombrero") + theme(axis.text.x = element_text(size = 8))
 
@@ -252,7 +252,7 @@ plot6 = muestra %>% group_by(gill_attachment, class) %>% count() %>%
   ggplot() +
   aes(x = gill_attachment, fill = factor(class), y = n) +
   geom_bar(position = "fill",  stat="identity") +
-  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
+  scale_fill_manual(values = c("#6B1D6B", "#FC814A"), guide = "none") +
   scale_x_discrete(name = "") +
   labs(y = "Frecuencia relativa", title = "Tipo de lámina") + theme(axis.text.x = element_text(size = 8))
 
@@ -264,7 +264,7 @@ plot7 = muestra %>% group_by(gill_color, class) %>% count() %>%
   ggplot() +
   aes(x = gill_color, fill = factor(class), y = n) +
   geom_bar(position = "fill",  stat="identity") +
-  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
+  scale_fill_manual(values = c("#6B1D6B", "#FC814A"), guide = "none") +
   scale_x_discrete(name = "") +
   labs(y = "Frecuencia relativa", title = "Color de lámina") + theme(axis.text.x = element_text(size = 8))
 
@@ -276,7 +276,7 @@ plot8 = muestra %>% group_by(stem_color, class) %>% count() %>%
   ggplot() +
   aes(x = stem_color, fill = factor(class), y = n) +
   geom_bar(position = "fill",  stat="identity") +
-  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
+  scale_fill_manual(values = c("#6B1D6B", "#FC814A"), guide = "none") +
   scale_x_discrete(name = "") +
   labs(y = "Frecuencia relativa", title = "Color del tallo") + theme(axis.text.x = element_text(size = 8))
 
@@ -288,7 +288,7 @@ plot9 = muestra %>% group_by(season, class) %>% count() %>%
   ggplot() +
   aes(x = season, fill = factor(class), y = n) +
   geom_bar(position = "fill",  stat="identity") +
-  scale_fill_manual(values = c("slateblue", "orangered"), guide = "none") +
+  scale_fill_manual(values = c("#6B1D6B", "#FC814A"), guide = "none") +
   scale_x_discrete(name = "") +
   labs(y = "Frecuencia relativa", title = "Temporada") 
 
@@ -411,7 +411,7 @@ a11 = anova(mod_sin_scolor, mod_1, test = "LRT")
 a12 = anova(mod_sin_season, mod_1, test = "LRT") # p-v = 0.05, el beta asoc. a season es 0
 ```
 
-Se encontraron significativas a el diámetro del sombrero, la forma de sombrero, el color de tallo y la temporada, por lo que se plantea un modelo con todas incluidas y se quitan todas las que no aporten significativamente a la explicacion.
+Las variables significativas de forma marginal son el diámetro del sombrero, la forma de sombrero, el color de tallo y la temporada, por lo que se plantea un modelo con todas incluidas y se quitan todas las que no aporten significativamente a la explicacion.
 
 
 \begin{table}[H]
@@ -523,8 +523,10 @@ Forma del sombrero x Color de las láminas    & 4  & `r round(a19$Deviance[2],3)
 Ninguna interaccion es significativa por lo que el modelo a utilizar es el siguiente:
 
 
-Introducir modelo
+$$Y_i = \beta_{0} + \beta_{1}  D_i + \beta_{2}  C_i + \beta_{3}  Hundidos_i + \beta_{4}  Otros_i 
++ \beta_{5}  Calidos_i + \beta_{6}  Frios_i + \beta_{7}  Ninguno_i + \beta_{8}  Oscuros = \eta_i$$ 
 
+Donde $Y_i \sim Be(\pi_i)$  
 
 
 Una vez elegido el modelo, se prueba si se debe o no añadir las variables cuantitativas de forma lineal o no. Se divide VARIABLE en CATEGORIAS y bla bla.
@@ -711,7 +713,11 @@ a23 = anova(mod_sin_season, modelo_loglog.2, test="LRT")
 Los cosos son parecidos entonces se usa logit por facilidad de interpretacion
 
 
-## Interpretacion de los parametros
+## Modelo propuesto
+
+Luego de seleccionar las variables a incluir y la función de enlace, se llega al siguiente modelo:
+
+
 
 ```{r, echo=FALSE}
 # Comparo diametros con un incremento en 5cm
