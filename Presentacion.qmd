@@ -99,8 +99,7 @@ hongos = hongos %>%
       stem_color == "e" | stem_color == "y" | stem_color == "o" | stem_color == "p" ~ "Calidos",
     stem_color == "u" | stem_color == "r" | stem_color == "l" ~ "Frios",
     stem_color == "w" | stem_color == "g" | stem_color == "b" ~ "Claros",
-    stem_color == "n" | stem_color == "k" ~ "Oscuros",
-    stem_color == "f" ~ "Ninguno")
+    stem_color == "n" | stem_color == "k" | stem_color == "f" ~ "Oscuros")
       ,
     cap_shape = case_when(
       cap_shape == "f" ~ "Chato",
@@ -523,10 +522,6 @@ Forma del sombrero x Color de las láminas    & 4  & `r round(a19$Deviance[2],3)
 Ninguna interaccion es significativa por lo que el modelo a utilizar es el siguiente:
 
 
-$$Y_i = \beta_{0} + \beta_{1}  D_i + \beta_{2}  C_i + \beta_{3}  Hundidos_i + \beta_{4}  Otros_i 
-+ \beta_{5}  Calidos_i + \beta_{6}  Frios_i + \beta_{7}  Ninguno_i + \beta_{8}  Oscuros = \eta_i$$ 
-
-Donde $Y_i \sim Be(\pi_i)$  
 
 
 Una vez elegido el modelo, se prueba si se debe o no añadir las variables cuantitativas de forma lineal o no. Se divide VARIABLE en CATEGORIAS y bla bla.
@@ -712,11 +707,21 @@ a23 = anova(mod_sin_season, modelo_loglog.2, test="LRT")
 
 Los cosos son parecidos entonces se usa logit por facilidad de interpretacion
 
-
 ## Modelo propuesto
 
 Luego de seleccionar las variables a incluir y la función de enlace, se llega al siguiente modelo:
 
+
+$$Y_i = \beta_{0} + \beta_{1}  D_i + \beta_{2}  C_i + \beta_{3}  Hundidos_i + \beta_{4}  Otros_i 
++ \beta_{5}  Calidos_i + \beta_{6}  Frios_i + \beta_{7}  Ninguno_i + \beta_{8}  Oscuros = \eta_i$$ 
+
+Donde $Y_i \sim Be(\pi_i)$ y $logit(\pi_i) = \eta_i$ 
+
+
+Se estima el modelo y se llega a la siguiente formula:
+
+$$logit(\hat{\pi_i}) = -0.20 + 0.06  D_i + 0.80  C_i + 0.07  Hundidos_i -1.40  Otros_i 
+-0.85 Calidos_i -0.58  Frios_i -14.18  Ninguno_i - 1.27 Oscuros_i $$
 
 
 ```{r, echo=FALSE}
