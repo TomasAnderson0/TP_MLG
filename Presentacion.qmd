@@ -5,6 +5,7 @@ lang: "es"
 header-includes:
   - \usepackage{ragged2e}
   - \usepackage{hyperref}
+  - \usepackage{amsmath}
 ---
 
 \Centering
@@ -310,7 +311,7 @@ Para el tipo de lámina, la categoría que tiene el mayor porcentaje de hongos c
 Para el color de lámina, la categoría que tiene el mayor porcentaje de hongos comestibles es claros con el `r round(100*abs(sum(muestra$class[muestra$gill_color == "Claros"]))/length(muestra$class[muestra$gill_color == "Claros"]),2)`% y la menor es ninguno con el `r round(100*abs(sum(muestra$class[muestra$gill_color=="Ninguno"]))/length(muestra$class[muestra$gill_color == "Ninguno"]),2)`%.
 
 
-Para el color del tallo, la categoría que tiene el mayor porcentaje de hongos comestibles es claros con el `r round(100*abs(sum(muestra$class[muestra$stem_color == "Claros"]))/length(muestra$class[muestra$stem_color == "Claros"]),2)`% y la menor es ninguno con el `r round(100*abs(sum(muestra$class[muestra$stem_color=="Ninguno"]))/length(muestra$class[muestra$stem_color == "Ninguno"]),2)`%.
+Para el color del tallo, la categoría que tiene el mayor porcentaje de hongos comestibles es claros con el `r round(100*abs(sum(muestra$class[muestra$stem_color == "Claros"]))/length(muestra$class[muestra$stem_color == "Claros"]),2)`% y la menor es oscuros con el `r round(100*abs(sum(muestra$class[muestra$stem_color=="Oscuros"]))/length(muestra$class[muestra$stem_color == "Oscuros"]),2)`%.
   
 
 
@@ -563,7 +564,7 @@ Y para ver que no haya falta de ajuste se usa el test de Hosmer-Lemeshow.
 
 ## Analisis de residuos
 
-```{r, echo=FALSE, warning=FALSE}
+```{r, echo=FALSE, warning=FALSE, fig.cap="Analisis de residuos del enlace logit"}
 # EVALUACION COMPONENTE SISTEMATICA
 
 # Residuos cuantil
@@ -598,7 +599,7 @@ grid.arrange(G1,G2, nrow = 1)
 
 ```
 
-```{r, echo=FALSE, warning=FALSE}
+```{r, echo=FALSE, warning=FALSE, eval=FALSE, fig.cap="Analisis de residuos del enlace probit"}
 # EVALUACION COMPONENTE SISTEMATICA
 
 # Residuos cuantil
@@ -633,7 +634,7 @@ grid.arrange(G3,G4, nrow = 1)
 
 ```
 
-```{r, echo=FALSE, warning=FALSE}
+```{r, echo=FALSE, warning=FALSE, eval=FALSE, fig.cap="Analisis de residuos del enlace loglog complementario"}
 # EVALUACION COMPONENTE SISTEMATICA
 
 # Residuos cuantil
@@ -668,7 +669,7 @@ grid.arrange(G5,G6, nrow = 1)
 
 ```
 
-## Adecuacion del enlace
+Pareceria no haber problemas con los residuos del modelo al usar la función de enlace logit. Para verificar su adecuación se agrega al modelo el predictor lineal estimado elevado al cuadrado($\boldsymbol{\hat{\eta}^2}$) como covariable y se prueba si es significativa o no. Se ajusta el nuevo modelo y se llega a la conclusiòn de que es adecuado el uso de dicho enlace**(p-value:0.41)**.
 
 ```{r, echo=FALSE}
 # Adecuación del enlace
@@ -705,23 +706,34 @@ a23 = anova(mod_sin_season, modelo_loglog.2, test="LRT")
 
 ```
 
-Los cosos son parecidos entonces se usa logit por facilidad de interpretacion
+
 
 ## Modelo propuesto
 
 Luego de seleccionar las variables a incluir y la función de enlace, se llega al siguiente modelo:
 
 
-$$Y_i = \beta_{0} + \beta_{1}  D_i + \beta_{2}  C_i + \beta_{3}  Hundidos_i + \beta_{4}  Otros_i 
-+ \beta_{5}  Calidos_i + \beta_{6}  Frios_i + \beta_{7}  Ninguno_i + \beta_{8}  Oscuros = \eta_i$$ 
+$$Y_i = \beta_{0} + \beta_{1}  D_i + \beta_{2}  C_i + \beta_{3}  H_i + \beta_{4}  O_i 
++ \beta_{5}  C_i + \beta_{6}  F_i +  \beta_{7}  Osc_i = \eta_i$$ 
 
 Donde $Y_i \sim Be(\pi_i)$ y $logit(\pi_i) = \eta_i$ 
 
+$Y_i$: Variable respuesta
+$D_i$: Diametro del sombrero del i-esimo hongo
+$C_i$: Variable dummy asociada a si el i-esimo hongo tiene un sombrero chato.
+$H_i$: Variable dummy asociada a si el i-esimo hongo tiene un sombrero hundido
+$O_i$: Variable dummy asociada a si el i-esimo hongo tiene un sombrero de otro tipo.
+$C_i$: Variable dummy asociada a si el i-esimo hongo tiene un tallo de color calido.
+$F_i$: Variable dummy asociada a si el i-esimo hongo tiene un tallo de color frio.
+$Osc_i$: Variable dummy asociada a si el i-esimo hongo tiene un tallo de color oscuro.
 
-Se estima el modelo y se llega a la siguiente formula:
+La categoria basal del modelo es un hongo con un tallo de color calido y una forma redondeada del sombrero.
 
-$$logit(\hat{\pi_i}) = -0.20 + 0.06  D_i + 0.80  C_i + 0.07  Hundidos_i -1.40  Otros_i 
--0.85 Calidos_i -0.58  Frios_i -14.18  Ninguno_i - 1.27 Oscuros_i $$
+
+Se estima el modelo y se llega a la siguiente ecuación:
+
+$$logit(\hat{\pi_i}) = -0.20 + 0.06  D_i + 0.80  C_i + 0.07  Hundidos_i -1.49  Otros_i 
+-0.85 Calidos_i -0.59  Frios_i - 1.28 Oscuros_i $$
 
 
 ```{r, echo=FALSE}
