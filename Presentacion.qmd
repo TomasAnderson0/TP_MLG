@@ -166,7 +166,7 @@ La metodología considerada para responder a estos propósitos es la construcci�
 ## Análisis descriptivo
 
 
-Primero, se muestra la distribución de si el hongo es comestible.
+Primero, se muestra la distribución de la variable respuesta.
 
 ```{r, echo=FALSE, message=FALSE, fig.cap="Cantidad de hongos según categoría", fig.height=3, fig.width=5}
 # Análisis descriptivo
@@ -203,7 +203,7 @@ ggplot() +
   geom_boxplot() + 
   scale_x_discrete(name = "Hongo", labels = c("Venenoso", "Comestible")) + 
   scale_y_continuous(name = "Diámetro") +
-  labs(title = "Diametro del sombrero") +
+  labs(title = "Diámetro del sombrero") +
   scale_color_manual(values = c("slateblue", "orangered"), guide = "none")
 
 ```
@@ -298,20 +298,20 @@ plot9 = muestra %>% group_by(season, class) %>% count() %>%
 ```{r, echo=FALSE, message=FALSE, fig.cap="Variables explicativas vs Tipo de hongo"}
 grid.arrange(plot2, plot3, plot4, plot9) 
 ```
-La distribución de la altura y el ancho del tallo,y el diametro del sombrero parecen ser parecidas para ambos tipos de hongos. Hay algunas observaciones atipicas en dichas variables que podrian afectar negativamente al momento de plantear un modelo. La temporada con menor porcentaje de hongos comestibles es el verano, con un `r round(100*abs(sum(muestra$class[muestra$season == "Verano"]))/length(muestra$class[muestra$season == "Verano"]),2)`%.
+La distribución de la altura y el ancho del tallo junto al diámetro del sombrero parecen ser parecidas para ambos tipos de hongos. Hay algunas observaciones atípicas en dichas variables que podrían afectar negativamente al momento de plantear un modelo. La temporada con menor porcentaje de hongos comestibles es el verano, con un `r round(100*abs(sum(muestra$class[muestra$season == "Verano"]))/length(muestra$class[muestra$season == "Verano"]),2)`%.
 
 ```{r, echo=FALSE, message=FALSE, fig.cap="Variables explicativas vs Tipo de hongo"}
 grid.arrange(plot5, plot6, plot7, plot8)
 ```
  
-Para la forma del sombrero, la categoria que tiene el mayor porcentaje de hongos comestibles es la chata con el `r round(100*abs(sum(muestra$class[muestra$cap_shape == "Chato"]))/length(muestra$class[muestra$cap_shape == "Chato"]),2)`% y la menor es otros con el `r round(100*abs(sum(muestra$class[muestra$cap_shape=="Otros"]))/length(muestra$class[muestra$cap_shape == "Otros"]),2)`%.
+Para la forma del sombrero, la categoría que tiene el mayor porcentaje de hongos comestibles es la chata con el `r round(100*abs(sum(muestra$class[muestra$cap_shape == "Chato"]))/length(muestra$class[muestra$cap_shape == "Chato"]),2)`% y la menor es otros con el `r round(100*abs(sum(muestra$class[muestra$cap_shape=="Otros"]))/length(muestra$class[muestra$cap_shape == "Otros"]),2)`%.
 
-Para el tipo de lamina, la categoria que tiene el mayor porcentaje de hongos comestibles es la libre con el `r round(100*abs(sum(muestra$class[muestra$gill_attachment == "Libre"]))/length(muestra$class[muestra$gill_attachment == "Libre"]),2)`% y la menor es ninguno con el `r round(100*abs(sum(muestra$class[muestra$gill_attachment=="Ninguno"]))/length(muestra$class[muestra$gill_attachment == "Ninguno"]),2)`%.
+Para el tipo de lámina, la categoría que tiene el mayor porcentaje de hongos comestibles es la libre con el `r round(100*abs(sum(muestra$class[muestra$gill_attachment == "Libre"]))/length(muestra$class[muestra$gill_attachment == "Libre"]),2)`% y la menor es ninguno con el `r round(100*abs(sum(muestra$class[muestra$gill_attachment=="Ninguno"]))/length(muestra$class[muestra$gill_attachment == "Ninguno"]),2)`%.
 
-Para el color de lamina, la categoria que tiene el mayor porcentaje de hongos comestibles es claros con el `r round(100*abs(sum(muestra$class[muestra$gill_color == "Claros"]))/length(muestra$class[muestra$gill_color == "Claros"]),2)`% y la menor es ninguno con el `r round(100*abs(sum(muestra$class[muestra$gill_color=="Ninguno"]))/length(muestra$class[muestra$gill_color == "Ninguno"]),2)`%.
+Para el color de lámina, la categoría que tiene el mayor porcentaje de hongos comestibles es claros con el `r round(100*abs(sum(muestra$class[muestra$gill_color == "Claros"]))/length(muestra$class[muestra$gill_color == "Claros"]),2)`% y la menor es ninguno con el `r round(100*abs(sum(muestra$class[muestra$gill_color=="Ninguno"]))/length(muestra$class[muestra$gill_color == "Ninguno"]),2)`%.
 
 
-Para el color del tallo, la categoria que tiene el mayor porcentaje de hongos comestibles es claros con el `r round(100*abs(sum(muestra$class[muestra$stem_color == "Claros"]))/length(muestra$class[muestra$stem_color == "Claros"]),2)`% y la menor es ninguno con el `r round(100*abs(sum(muestra$class[muestra$stem_color=="Ninguno"]))/length(muestra$class[muestra$stem_color == "Ninguno"]),2)`%.
+Para el color del tallo, la categoría que tiene el mayor porcentaje de hongos comestibles es claros con el `r round(100*abs(sum(muestra$class[muestra$stem_color == "Claros"]))/length(muestra$class[muestra$stem_color == "Claros"]),2)`% y la menor es ninguno con el `r round(100*abs(sum(muestra$class[muestra$stem_color=="Ninguno"]))/length(muestra$class[muestra$stem_color == "Ninguno"]),2)`%.
   
 
 
@@ -411,7 +411,7 @@ a11 = anova(mod_sin_scolor, mod_1, test = "LRT")
 a12 = anova(mod_sin_season, mod_1, test = "LRT") # p-v = 0.05, el beta asoc. a season es 0
 ```
 
-Se encontraron significativas a el diametro del sombrero, la forma de sombrero, el color de tallo y la temporada, por lo que se plantea un modelo con todas incluidas y se quitan todas las que no aporten significativamente a la explicacion.
+Se encontraron significativas a el diámetro del sombrero, la forma de sombrero, el color de tallo y la temporada, por lo que se plantea un modelo con todas incluidas y se quitan todas las que no aporten significativamente a la explicacion.
 
 
 \begin{table}[H]
@@ -461,7 +461,7 @@ a16 = anova(mod_sin_season, mod_6, test = "LRT")
 
 ```
 
-Se elimana la temporada del modelo y se prueba incluir las demas variables explicativas que no se incluyeron al principio.
+Se elimina la temporada del modelo y se prueba incluir las demas variables explicativas que no se incluyeron al principio.
 
 
 
@@ -754,7 +754,7 @@ ic_oscuros <- c(exp(-1.26587)-1.96*0.35123, exp(-1.26587)+1.96*0.35123)
 
 ## Prediccion y capacidad predictiva
 
-Para ver una medida de la capacidad predictiva del modelo se grafica una curva ROC y se observan las predicciones con el punto de corte optimo.
+Para ver una medida de la capacidad predictiva del modelo se grafica una curva ROC y se observan las predicciones con el punto de corte óptimo.
 
 ```{r, message=FALSE, echo=FALSE, warning=FALSE}
 par(pty = "s") # Para que grafique sólo en el (0;1)
