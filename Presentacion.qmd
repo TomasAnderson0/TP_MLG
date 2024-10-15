@@ -146,7 +146,7 @@ Se estima que existen entre 2 a 4 millones de hongos en el mundo de los cuales l
 La estadística nos puede ayudar a estimar cuáles pueden llegar a ser las principales diferencias entre las características de los hongos comestibles y venenosos. Para ello se cuenta con un conjunto de datos de 250 hongos clasificados en comestibles o venenosas con 9 variables. Estas son:
 
 - Venenoso o Comestible (Variable Respuesta)
-- Diámetro del sombrero
+- Diámetro del sombrero (cm)
 - Altura del tallo
 - Ancho del tallo
 - Forma del sombrero
@@ -787,6 +787,15 @@ RO_oscuros <- exp(-1.26587)
 ic_oscuros <- c(exp(-1.26587)-1.96*0.35123, exp(-1.26587)+1.96*0.35123)
 
 ```
+
+Para dar una idea de como cambian las probabilidades, se calculan las razones de odds para cambios de las categorias de las variables.
+
+Al aumentar en 5cm el diametro del sombrero del hongo, la chance de que el hongo sea comestible aumenta en un `r (RO_diameter-1)*100`%.
+
+
+La chance de que los hongos con sombreros chatos sea comestible es un `r (RO_chato-1)*100`% mas grande que esa misma chance para los hongos con forma redondeada del sombrero.
+
+
 
 
 ## Prediccion y capacidad predictiva
