@@ -166,9 +166,9 @@ La metodología considerada para responder a estos propósitos es la construcci�
 ## Análisis descriptivo
 
 
-Primero, se muestra la distribución de la variable respuesta.
+Primero, se muestra la distribución marginal de la variable respuesta.
 
-```{r, echo=FALSE, message=FALSE, fig.cap="Cantidad de hongos según categoría", fig.height=3, fig.width=5}
+```{r, echo=FALSE, message=FALSE, fig.cap="Porcentaje de hongos según el tipo ", fig.height=3, fig.width=5}
 # Análisis descriptivo
 theme_set(theme_bw())
 
@@ -520,12 +520,10 @@ Forma del sombrero x Color de las láminas    & 4  & `r round(a19$Deviance[2],3)
 \end{center}
 \end{table}
 
-Ninguna interaccion es significativa por lo que el modelo a utilizar es el siguiente:
+Ninguna interaccion es significativa por lo que no se incluyen en el modelo.
 
 
-
-
-Una vez elegido el modelo, se prueba si se debe o no añadir las variables cuantitativas de forma lineal o no. Se divide VARIABLE en CATEGORIAS y bla bla.
+Una vez elegidas las variables, se prueba si se debe añadir el diametro del sombrero del hongo de forma lineal o como un factor. Se divide la variable en cuatro grupos de tamaño parecido y se crean dos variables con ellos, una ordinal y la otra categorica. Se introducen al modelo ambas y se comparan las deviance de los modelos. No se rechaza(**p-value:0.20**) la hipotesis nula de no linealidad, por lo que se mantiene en el modelo la variable en su forma original. 
 
 
 ```{r, echo=FALSE}
@@ -558,7 +556,7 @@ hs = hoslem.test(muestra$class, fitted(mod_sin_season), g = 10)
 # No hay falta de ajuste
 ```
 
-Y para ver que no haya falta de ajuste se usa el test de Hosmer-Lemeshow.
+Ademas, para verificar la bondad del ajuste del modelo se utiliza el test de Hosmer-Lemeshow con 10 grupos, resultando en un no rechazo(**p-value:0.93**) de la hipotesis nula de bondad del ajuste.
 
 
 
@@ -669,7 +667,7 @@ grid.arrange(G5,G6, nrow = 1)
 
 ```
 
-Pareceria no haber problemas con los residuos del modelo al usar la función de enlace logit. Para verificar su adecuación se agrega al modelo el predictor lineal estimado elevado al cuadrado($\boldsymbol{\hat{\eta}^2}$) como covariable y se prueba si es significativa o no. Se ajusta el nuevo modelo y se llega a la conclusiòn de que es adecuado el uso de dicho enlace**(p-value:0.41)**.
+Pareceria no haber problemas con los residuos del modelo al usar la función de enlace logit. Para verificar su adecuación se agrega al modelo el predictor lineal estimado elevado al cuadrado($\boldsymbol{\hat{\eta}^2}$) como covariable y se prueba si es significativa o no. Se ajusta el nuevo modelo y se llega a la conclusiòn de que es adecuado el uso de dicho enlace(**p-value:0.41**).
 
 ```{r, echo=FALSE}
 # Adecuación del enlace
@@ -719,16 +717,25 @@ $$Y_i = \beta_{0} + \beta_{1}  D_i + \beta_{2}  C_i + \beta_{3}  H_i + \beta_{4}
 Donde $Y_i \sim Be(\pi_i)$ y $logit(\pi_i) = \eta_i$ 
 
 $Y_i$: Variable respuesta
+
 $D_i$: Diametro del sombrero del i-esimo hongo
+
 $C_i$: Variable dummy asociada a si el i-esimo hongo tiene un sombrero chato.
-$H_i$: Variable dummy asociada a si el i-esimo hongo tiene un sombrero hundido
+
+$H_i$: Variable dummy asociada a si el i-esimo hongo tiene un sombrero hundido.
+
 $O_i$: Variable dummy asociada a si el i-esimo hongo tiene un sombrero de otro tipo.
+
 $C_i$: Variable dummy asociada a si el i-esimo hongo tiene un tallo de color calido.
+
 $F_i$: Variable dummy asociada a si el i-esimo hongo tiene un tallo de color frio.
+
 $Osc_i$: Variable dummy asociada a si el i-esimo hongo tiene un tallo de color oscuro.
+
 
 La categoria basal del modelo es un hongo con un tallo de color calido y una forma redondeada del sombrero.
 
+## Razones de odds
 
 Se estima el modelo y se llega a la siguiente ecuación:
 
@@ -793,6 +800,7 @@ El punto de corte que maximiza la sensibilidad, la especificidad y la precision 
 
 
 ```{r, echo=FALSE}
+
 y_obs  <- factor(ifelse(muestra$class == 1, "Comestible", "Venenoso"), 
                  levels = c("Venenoso", "Comestible"))
 y_pred <- factor(ifelse(fitted(mod_sin_season
