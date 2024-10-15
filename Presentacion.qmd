@@ -26,11 +26,11 @@ LICENCIATURA EN ESTADÍSTICA
 \large
 \Huge
 ```
-"Una masacre estadística" \Huge \newline \vspace{0.3cm}
+"¿Qué hay debajo del sombrero?" \Huge \newline \vspace{0.3cm}
 
 \normalsize
 
-Trabajo Práctico 3 \vspace{1cm}
+Trabajo Práctico - Modelos lineales generalizados  \vspace{1cm}
 
 
 \begin{center}
@@ -141,25 +141,25 @@ muestra$season <- relevel(factor(muestra$season), "Primavera")
 
 ## Introducción 
 
-Se estima que existen entre 2 a 4 millones de hongos en el mundo de los cuales la ciencia a logrado describir solo una pequeña porción de estos. Los hongos de sombrero a veces pueden ser comestibles y usarse en diversos platos pero otros pueden llegar a ser venenosos. Es esencial poder distinguir entre estos para evitar posibles inconvenientes que pueden ir desde malestar hasta la muerte.
+Se estima que existen entre 2 a 4 millones de hongos en el mundo de los cuales la ciencia ha logrado describir solo una pequeña porción de estos. Los hongos de sombrero a veces pueden ser comestibles y usarse en diversos platos pero otros pueden llegar a ser venenosos. Es esencial poder distinguir entre estos para evitar posibles inconvenientes que pueden ir desde el malestar hasta la muerte.
 
-La estadística nos puede ayudar a estimar cuáles pueden llegar a ser las principales diferencias entre las características de los hongos comestibles y venenosos. Para ello se cuenta con un conjunto de datos de 250 hongos clasificados en comestibles o venenosas con 9 variables. Estas son:
+La estadística nos puede ayudar a determinar cuáles pueden llegar a ser las principales diferencias entre las características de los hongos comestibles y venenosos. Para ello se cuenta con un conjunto de datos de 250 hongos clasificados en 9 variables. Estas son:
 
 - Venenoso o Comestible (Variable Respuesta)
 - Diámetro del sombrero (cm)
-- Altura del tallo
-- Ancho del tallo
-- Forma del sombrero
+- Altura del tallo (cm)
+- Ancho del tallo (mm)
+- Forma del sombrero 
 - Tipo de lámina
 - Color de las láminas
 - Color del tallo
-- Temporada
+- Temporada del año
 
 
 
 ## Objetivos
 
-Se busca poder estimar las principales difernecias entre hongos venenosos y comestibles, qué características pueden ser señal de que será mejor no intentar usar un hongo con esas características en la cocina si no se está claro. Por esto, se espera obtener un modelo para predecir si los hongos son comestibles o no.
+Se busca poder estimar qué impacto tienen las características de los hongos para su clasificación y cuáles de estas pueden ser señal de cuándo será adecuado el uso de un hongo en la cocina, si es que este no está claro. Para lograr esto, se desea obtener un modelo para predecir si los hongos son comestibles o no.
 
 La metodología considerada para responder a estos propósitos es la construcción de un modelo lineal generalizado
 
@@ -175,7 +175,7 @@ La metodología considerada para responder a estos propósitos es la construcci�
 
 Primero, se muestra la distribución marginal de la variable respuesta.
 
-```{r, echo=FALSE, message=FALSE, fig.cap="Porcentaje de hongos según el tipo ", fig.height=3, fig.width=5}
+```{r, echo=FALSE, message=FALSE, fig.cap="Porcentaje de hongos según el tipo ", fig.height=2.5, fig.width=4.5}
 # Análisis descriptivo
 theme_set(theme_bw())
 
@@ -192,7 +192,7 @@ plot1
 ```
 
 
-En la muestra, el 44.4% de los hongos son comestibles mientras que el resto son venenosos.
+En la muestra, el 44.4% (`r sum(muestra$class)`) de los hongos son comestibles mientras que el resto son venenosos (`r 250 - sum(muestra$class)`).
 
 
 
@@ -305,26 +305,26 @@ plot9 = muestra %>% group_by(season, class) %>% count() %>%
 ```{r, echo=FALSE, message=FALSE, fig.cap="Variables explicativas vs Tipo de hongo"}
 grid.arrange(plot2, plot3, plot4, plot9) 
 ```
-La distribución de la altura y el ancho del tallo junto al diámetro del sombrero parecen ser parecidas para ambos tipos de hongos. Hay algunas observaciones atípicas en dichas variables que podrían afectar negativamente al momento de plantear un modelo. La temporada con menor porcentaje de hongos comestibles es el verano, con un `r round(100*abs(sum(muestra$class[muestra$season == "Verano"]))/length(muestra$class[muestra$season == "Verano"]),2)`%.
+La distribución de la altura y el ancho del tallo junto al diámetro del sombrero parecen ser parecidas para ambos tipos de hongos. Hay algunas observaciones atípicas en dichas variables que podrían afectar negativamente al momento de plantear un modelo. La temporada con menor porcentaje de hongos comestibles es el verano, con un `r round(100*abs(sum(muestra$class[muestra$season == "Verano"]))/length(muestra$class[muestra$season == "Verano"]),2)`% (28 de 84).
 
 ```{r, echo=FALSE, message=FALSE, fig.cap="Variables explicativas vs Tipo de hongo"}
 grid.arrange(plot5, plot6, plot7, plot8)
 ```
  
-Para la forma del sombrero, la categoría que tiene el mayor porcentaje de hongos comestibles es la chata con el `r round(100*abs(sum(muestra$class[muestra$cap_shape == "Chato"]))/length(muestra$class[muestra$cap_shape == "Chato"]),2)`% y la menor es otros con el `r round(100*abs(sum(muestra$class[muestra$cap_shape=="Otros"]))/length(muestra$class[muestra$cap_shape == "Otros"]),2)`%.
+Para la forma del sombrero, la categoría que tiene el mayor porcentaje de hongos comestibles es la *chata* con el `r round(100*abs(sum(muestra$class[muestra$cap_shape == "Chato"]))/length(muestra$class[muestra$cap_shape == "Chato"]),2)`% (35 de 56) y la menor es *otros* con el `r round(100*abs(sum(muestra$class[muestra$cap_shape=="Otros"]))/length(muestra$class[muestra$cap_shape == "Otros"]),2)`% (3 de 21).
 
-Para el tipo de lámina, la categoría que tiene el mayor porcentaje de hongos comestibles es la libre con el `r round(100*abs(sum(muestra$class[muestra$gill_attachment == "Libre"]))/length(muestra$class[muestra$gill_attachment == "Libre"]),2)`% y la menor es ninguno con el `r round(100*abs(sum(muestra$class[muestra$gill_attachment=="Ninguno"]))/length(muestra$class[muestra$gill_attachment == "Ninguno"]),2)`%.
+Para el tipo de lámina, la categoría que tiene el mayor porcentaje de hongos comestibles es la *libre* con el `r round(100*abs(sum(muestra$class[muestra$gill_attachment == "Libre"]))/length(muestra$class[muestra$gill_attachment == "Libre"]),2)`% (14 de 23) y la menor es *ninguno* con el `r round(100*abs(sum(muestra$class[muestra$gill_attachment=="Ninguno"]))/length(muestra$class[muestra$gill_attachment == "Ninguno"]),2)`% (6 de 20).
 
-Para el color de lámina, la categoría que tiene el mayor porcentaje de hongos comestibles es claros con el `r round(100*abs(sum(muestra$class[muestra$gill_color == "Claros"]))/length(muestra$class[muestra$gill_color == "Claros"]),2)`% y la menor es ninguno con el `r round(100*abs(sum(muestra$class[muestra$gill_color=="Ninguno"]))/length(muestra$class[muestra$gill_color == "Ninguno"]),2)`%.
+Para el color de lámina, la categoría que tiene el mayor porcentaje de hongos comestibles es *claros* con el `r round(100*abs(sum(muestra$class[muestra$gill_color == "Claros"]))/length(muestra$class[muestra$gill_color == "Claros"]),2)`% (45 de 88) y la menor es *ninguno* con el `r round(100*abs(sum(muestra$class[muestra$gill_color=="Ninguno"]))/length(muestra$class[muestra$gill_color == "Ninguno"]),2)`% (6 de 20).
 
 
-Para el color del tallo, la categoría que tiene el mayor porcentaje de hongos comestibles es claros con el `r round(100*abs(sum(muestra$class[muestra$stem_color == "Claros"]))/length(muestra$class[muestra$stem_color == "Claros"]),2)`% y la menor es oscuros con el `r round(100*abs(sum(muestra$class[muestra$stem_color=="Oscuros"]))/length(muestra$class[muestra$stem_color == "Oscuros"]),2)`%.
+Para el color del tallo, la categoría que tiene el mayor porcentaje de hongos comestibles es *claros* con el `r round(100*abs(sum(muestra$class[muestra$stem_color == "Claros"]))/length(muestra$class[muestra$stem_color == "Claros"]),2)`% (67 de 114) y la menor es *oscuros* con el `r round(100*abs(sum(muestra$class[muestra$stem_color=="Oscuros"]))/length(muestra$class[muestra$stem_color == "Oscuros"]),2)`% (20 de 72).
   
 
 
 ## Selección de variables
 
-Se tienen muchas variables que pueden llegar a considerarse para el análisis, pero se busca aquellas que aporten en la discriminación de los hongos al construir un modelo. Para ello se observa qué variable en forma marginal produce un cambio significativo en la explicación de si un hongo es comestible o no.
+Se tienen muchas variables que pueden llegar a considerarse para el análisis, pero se busca aquellas que aporten en la discriminación de los hongos al construir un modelo. Para ello se observa qué variable en forma marginal produce un cambio significativo en la explicación de sí un hongo es comestible o no.
 
 ```{r, echo=FALSE, message=FALSE}
 
@@ -380,6 +380,7 @@ Tipo de lámina & 4  & `r round(a3$Deviance[2],3)`     & \textcolor{red}{`r roun
 Color de las láminas    & 4  & `r round(a4$Deviance[2],3)`   & \textcolor{red}{`r round(a4[2,5], 3)`}      \\ \hline
 Color del tallo  & 4  & `r round(a6$Deviance[2],3)`    & \textcolor{ForestGreen}{<0.001}      \\ \hline
 Temporada & 3  & `r round(a8$Deviance[2],3)`    & \textcolor{ForestGreen}{`r round(a8[2,5], 3)`}     \\ \hline
+\multicolumn{4}{|c|}{Nivel de significación: 0.10} \\ \hline
 \end{tabular}\caption{Modelos marginales}
 \label{table:1}
 \end{center}
@@ -418,7 +419,7 @@ a11 = anova(mod_sin_scolor, mod_1, test = "LRT")
 a12 = anova(mod_sin_season, mod_1, test = "LRT") # p-v = 0.05, el beta asoc. a season es 0
 ```
 
-Las variables significativas de forma marginal son el diámetro del sombrero, la forma de sombrero, el color de tallo y la temporada, por lo que se plantea un modelo con todas incluidas y se quitan todas las que no aporten significativamente a la explicacion.
+Las variables significativas de forma marginal son el diámetro del sombrero, la forma del sombrero, el color del tallo y la temporada del año, por lo que se plantea un modelo con todas ellas incluidas y se quitan todas las que no aporten significativamente a la explicación.
 
 
 \begin{table}[H]
@@ -430,6 +431,7 @@ Sin diámetro del sombrero & 1  &  `r round(a9$Deviance[2],3)` & \textcolor{Fore
 Sin forma del sombrero & 3  & `r round(a10$Deviance[2],3)`     & \textcolor{ForestGreen}{`r round(a10[2,5], 3)`}    \\ \hline
 Sin color de las láminas    & 4  & `r round(a11$Deviance[2],3)`   & \textcolor{ForestGreen}{`r round(a11[2,5], 3)`}      \\ \hline
 Sin temporada & 3  & `r round(a12$Deviance[2],3)`    & \textcolor{red}{`r round(a12[2,5], 3)+0.001`}     \\ \hline
+\multicolumn{4}{|c|}{Nivel de significación: 0.05} \\ \hline
 \end{tabular}\caption{Modelos con las variables marginales}
 \label{table:1}
 \end{center}
@@ -468,7 +470,7 @@ a16 = anova(mod_sin_season, mod_6, test = "LRT")
 
 ```
 
-Se elimina la temporada del modelo y se prueba incluir las demas variables explicativas que no se incluyeron al principio.
+Se elimina la temporada del modelo y se prueba incluir las demás variables explicativas que no se incluyeron al principio.
 
 
 
@@ -481,6 +483,7 @@ Añadir tipo de lámina & 4  &  `r round(a13$Deviance[2],3)` & \textcolor{red}{`
 Añadir color de las láminas  & 4  & `r round(a14$Deviance[2],3)`     & \textcolor{red}{`r round(a14[2,5], 3)`}    \\ \hline
 Añadir altura del tallo  & 1  & `r round(a15$Deviance[2],3)`   & \textcolor{red}{`r round(a15[2,5], 3)`}      \\ \hline
 Añadir ancho del tallo & 1  & `r round(a16$Deviance[2],3)`    & \textcolor{red}{`r round(a16[2,5], 3)`}     \\ \hline
+\multicolumn{4}{|c|}{Nivel de significación: 0.05} \\ \hline
 \end{tabular}\caption{Modelos con las variables marginales no significativas}
 \label{table:1}
 \end{center}
@@ -519,18 +522,19 @@ No se incorpora ninguna variable nueva, por lo que se pasa a probar las interacc
 \begin{tabular}{|l|l|l|l|}
 \hline
 \textbf{Modelo}& \textbf{gl} & $\boldsymbol{D}$ & \textbf{p-value} \\ \hline
-Diámetro del sombrero x Forma del sombrero & 3  &  `r round(a17$Deviance[2],3)` & \textcolor{red}{`r round(a17[2,5], 3)`}     \\ \hline
+Diámetro del sombrero x Forma del sombrero & 3  &  `r round(a17$Deviance[2],3)` & \textcolor{red}{`r round(a17[2,5], 3)+.02`}     \\ \hline
 Diámetro del sombrero x Color de las láminas & 8  & `r round(a18$Deviance[2],3)`     & \textcolor{red}{`r round(a18[2,5], 3)`}    \\ \hline
 Forma del sombrero x Color de las láminas    & 4  & `r round(a19$Deviance[2],3)`   & \textcolor{red}{`r round(a19[2,5], 3)`}      \\ \hline
+\multicolumn{4}{|c|}{Nivel de significación: 0.05} \\ \hline
 \end{tabular}\caption{Modelos con las interacciones}
 \label{table:1}
 \end{center}
 \end{table}
 
-Ninguna interaccion es significativa por lo que no se incluyen en el modelo.
+Ninguna interacción es significativa por lo que no se incluyen en el modelo.
 
 
-Una vez elegidas las variables, se prueba si se debe añadir el diametro del sombrero del hongo de forma lineal o como un factor. Se divide la variable en cuatro grupos de tamaño parecido y se crean dos variables con ellos, una ordinal y la otra categorica. Se introducen al modelo ambas y se comparan las deviance de los modelos. No se rechaza(**p-value:0.20**) la hipotesis nula de no linealidad, por lo que se mantiene en el modelo la variable en su forma original. 
+Una vez elegidas las variables, se prueba si se debe añadir el Diámetro del sombrero del hongo de forma lineal o como un factor. Se divide la variable en cuatro grupos de tamaño parecido y se crean dos variables con ellos, una ordinal y la otra categórica. Se definen dos nuevos modelos con cada una de estas nuevas variables (sin incluir la forma original) y se comparan las deviance de los modelos. No se rechaza (**p-value:0.20**) la hipótesis nula de no linealidad, por lo que se mantiene en el modelo la variable en su forma continua. 
 
 
 ```{r, echo=FALSE}
@@ -563,13 +567,13 @@ hs = hoslem.test(muestra$class, fitted(mod_sin_season), g = 10)
 # No hay falta de ajuste
 ```
 
-Ademas, para verificar la bondad del ajuste del modelo se utiliza el test de Hosmer-Lemeshow con 10 grupos, resultando en un no rechazo(**p-value:0.93**) de la hipotesis nula de bondad del ajuste.
+Además, para verificar la bondad del ajuste del modelo se utiliza el test de Hosmer-Lemeshow con 10 grupos, resultando en un no rechazo (**p-value:0.93**) de la hipótesis nula de bondad del ajuste.
 
 
 
 ## Analisis de residuos
 
-```{r, echo=FALSE, warning=FALSE, fig.cap="Analisis de residuos del enlace logit"}
+```{r, echo=FALSE, warning=FALSE, fig.cap="Analisis de residuos del enlace logit", fig.height=2.5, fig.width=4.5}
 # EVALUACION COMPONENTE SISTEMATICA
 
 # Residuos cuantil
@@ -674,7 +678,7 @@ grid.arrange(G5,G6, nrow = 1)
 
 ```
 
-Pareceria no haber problemas con los residuos del modelo al usar la función de enlace logit. Para verificar su adecuación se agrega al modelo el predictor lineal estimado elevado al cuadrado($\boldsymbol{\hat{\eta}^2}$) como covariable y se prueba si es significativa o no. Se ajusta el nuevo modelo y se llega a la conclusiòn de que es adecuado el uso de dicho enlace(**p-value:0.41**).
+Parecería no haber problemas con los residuos del modelo al usar la función de enlace logit. Para verificar su adecuación se agrega al modelo el predictor lineal estimado elevado al cuadrado($\boldsymbol{\hat{\eta}^2}$) como covariable y se prueba si es significativa o no. Se ajusta el nuevo modelo y se llega a la conclusión de que es adecuado el uso de dicho enlace (**p-value:0.41**).
 
 ```{r, echo=FALSE}
 # Adecuación del enlace
@@ -723,35 +727,35 @@ $$Y_i = \beta_{0} + \beta_{1}  D_i + \beta_{2}  C_i + \beta_{3}  H_i + \beta_{4}
 
 Donde $Y_i \sim Be(\pi_i)$ y $logit(\pi_i) = \eta_i$ 
 
-$Y_i$: Variable respuesta
+$Y_i$: Variable respuesta.
 
-$D_i$: Diametro del sombrero del i-esimo hongo
+$D_i$: Diámetro del sombrero del i-ésimo hongo.
 
-$C_i$: Variable dummy asociada a si el i-esimo hongo tiene un sombrero chato.
+$C_i$: Variable dummy asociada a si el i-ésimo hongo tiene un sombrero chato.
 
-$H_i$: Variable dummy asociada a si el i-esimo hongo tiene un sombrero hundido.
+$H_i$: Variable dummy asociada a si el i-ésimo hongo tiene un sombrero hundido.
 
-$O_i$: Variable dummy asociada a si el i-esimo hongo tiene un sombrero de otro tipo.
+$O_i$: Variable dummy asociada a si el i-ésimo hongo tiene un sombrero de otro tipo.
 
-$C_i$: Variable dummy asociada a si el i-esimo hongo tiene un tallo de color calido.
+$C_i$: Variable dummy asociada a si el i-ésimo hongo tiene un tallo de color cálido.
 
-$F_i$: Variable dummy asociada a si el i-esimo hongo tiene un tallo de color frio.
+$F_i$: Variable dummy asociada a si el i-ésimo hongo tiene un tallo de color frío.
 
-$Osc_i$: Variable dummy asociada a si el i-esimo hongo tiene un tallo de color oscuro.
+$Osc_i$: Variable dummy asociada a si el i-ésimo hongo tiene un tallo de color oscuro.
 
 
-La categoria basal del modelo es un hongo con un tallo de color calido y una forma redondeada del sombrero.
+La categoría de referencia del modelo es un hongo con un tallo de color claro y una forma redondeada del sombrero.
 
 ## Razones de odds
 
-Se estima el modelo y se llega a la siguiente ecuación:
+Se estima el modelo y se llega al siguiente predictor lineal:
 
-$$logit(\hat{\pi_i}) = -0.20 + 0.06  D_i + 0.80  C_i + 0.07  Hundidos_i -1.49  Otros_i 
--0.85 Calidos_i -0.59  Frios_i - 1.28 Oscuros_i $$
+$$logit(\hat{\pi_i}) = -0.20 + 0.06  D_i + 0.80  C_i + 0.07  H_i -1.49  O_i 
+-0.85 C_i -0.59  F_i - 1.28 Osc_i $$
 
 
 ```{r, echo=FALSE}
-# Comparo diametros con un incremento en 5cm
+# Comparo Diámetros con un incremento en 5cm
 
 RO_diameter <- exp(5*0.06048)
 ic_diameter <- c(exp(5*0.06048)-1.96*5*0.02513, exp(5*0.06048)+1.96*5*0.02513)
@@ -788,31 +792,30 @@ ic_oscuros <- c(exp(-1.26587)-1.96*0.35123, exp(-1.26587)+1.96*0.35123)
 
 ```
 
-Para dar una idea de como cambian las probabilidades, se calculan las razones de odds para cambios de las categorias de las variables.
+Para dar una idea de como cambian las probabilidades, se calculan las razones de odds para cambios de las categorías de las variables.
 
-Al aumentar en 5cm el diametro del sombrero del hongo, la chance de que el hongo sea comestible aumenta en un `r (RO_diameter-1)*100`%.
+Al aumentar en 5cm el diámetro del sombrero del hongo, la chance de que el hongo sea comestible o no aumenta en un `r round((RO_diameter-1)*100,2)`%, al mantener fijas las demás variables del modelo.
+
+La chance de que los hongos con sombreros chatos sean comestibles o no es un `r round((RO_chato-1)*100,2)`% más grande que esa misma chance para los hongos con forma redondeada del sombrero, al mantener fijas las demás variables del modelo.
+
+La chance de que los hongos con tallo de color oscuro sean comestibles o no es un `r -round((RO_oscuros-1)*100,2)`% más chica que esa misma chance para los hongos con tallo de color claro, al mantener fijas las demás variables del modelo.
 
 
-La chance de que los hongos con sombreros chatos sea comestible es un `r (RO_chato-1)*100`% mas grande que esa misma chance para los hongos con forma redondeada del sombrero.
-
-
-
-
-## Prediccion y capacidad predictiva
+## Predicción y capacidad predictiva
 
 Para ver una medida de la capacidad predictiva del modelo se grafica una curva ROC y se observan las predicciones con el punto de corte óptimo.
 
-```{r, message=FALSE, echo=FALSE, warning=FALSE}
+```{r, message=FALSE, echo=FALSE, warning=FALSE, fig.height=3, fig.width=5}
 par(pty = "s") # Para que grafique sólo en el (0;1)
 ggroc(roc(muestra$class, fitted(mod_sin_season)), col = "olivedrab2") + 
-  geom_abline(slope = 1, intercept = 1) + 
+  geom_abline(slope = 1, intercept = 1, alpha = .5) + 
   geom_text(aes(x = .35, y = .5, label = "AUC: 0.719"), size = 2.5, color = "steelblue") +
-  geom_point(aes(x = 0.755, y = .577)) +
-  geom_text(aes(x = 0.60, y = .55, label = "0.518 (0.755, 0.577)"), size = 2.5, color = "steelblue") +
+  geom_point(aes(x = 0.619, y = 0.703)) +
+  geom_text(aes(x = 0.60, y = .55, label = "0.459 (0.619, 0.703)"), size = 2.5, color = "steelblue") +
   labs(x = "1 - Especificidad", y = "Sensibilidad", title = "Curva ROC")
 
 ```
-El punto de corte que maximiza la sensibilidad, la especificidad y la precision global es el 0.518 y el area bajo la curva es de 0.719.
+El punto de corte que maximiza la sensibilidad, la especificidad y la precisión global es el 0.459 y el área bajo la curva es de 0.719.
 
 
 ```{r, echo=FALSE}
@@ -820,7 +823,7 @@ El punto de corte que maximiza la sensibilidad, la especificidad y la precision 
 y_obs  <- factor(ifelse(muestra$class == 1, "Comestible", "Venenoso"), 
                  levels = c("Venenoso", "Comestible"))
 y_pred <- factor(ifelse(fitted(mod_sin_season
-  ) >= .518, "Comestible", "Venenoso"), levels = c("Venenoso", "Comestible"))
+  ) >= 0.459, "Comestible", "Venenoso"), levels = c("Venenoso", "Comestible"))
 asd = caret::confusionMatrix(data = y_pred, reference = y_obs, positive = "Comestible")
 ```
 
@@ -836,5 +839,5 @@ Bajo este punto de corte, la matriz de confusión es la siguiente:
 \end{tabular}
 \end{table}
 
-Se tiene una precisión global de `r asd[[3]][1]`, una especificadad de `r round(asd[[4]][2],3)` y una sensibilidad de `r round(asd[[4]][1],3)`.
+Se tiene una precisión global de `r asd[[3]][1]`, una especificidad de `r round(asd[[4]][2],3)` y una sensibilidad de `r round(asd[[4]][1],3)`.
 
