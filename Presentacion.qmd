@@ -32,6 +32,13 @@ LICENCIATURA EN ESTADÍSTICA
 
 Trabajo Práctico 3 \vspace{1cm}
 
+
+\begin{center}
+    \includegraphics[width=.8\linewidth]{Mushrooms.png}
+\end{center}
+
+\vspace{3cm}
+
 Autores: Tomás Anderson - Alejo Vaschetti - Rocio Yael Canteros
 
 Docentes: Gabriela Boggio - Victorio Costa - Guillermina Harvey
