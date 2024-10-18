@@ -6,6 +6,7 @@ header-includes:
   - \usepackage{ragged2e}
   - \usepackage{hyperref}
   - \usepackage{amsmath}
+  - \usepackage{makecell}
 ---
 
 \Centering
@@ -156,7 +157,7 @@ La estadística nos puede ayudar a determinar cuáles pueden llegar a ser las pr
 
 Se busca poder estimar qué impacto tienen las características de los hongos para su clasificación y cuáles de estas pueden ser señal de cuándo será adecuado el uso de un hongo en la cocina, si es que este no está claro. Para lograr esto, se desea obtener un modelo para predecir si los hongos son comestibles o no.
 
-La metodología considerada para responder a estos propósitos es la construcción de un modelo lineal generalizado
+La metodología considerada para responder a estos propósitos es la construcción de un modelo lineal generalizado.
 
 ## Análisis descriptivo
 
@@ -346,7 +347,7 @@ a8 = anova(mod_int, mod_season, test = "LRT") # Significativa
 
 ```
 
-```{=tex}
+
 \begin{table}[H]
 \begin{center}
 \begin{tabular}{|l|l|l|l|}
@@ -365,7 +366,7 @@ Temporada & 3  & `r round(a8$Deviance[2],3)`    & \textcolor{ForestGreen}{`r rou
 \label{table:1}
 \end{center}
 \end{table}
-```
+
 ```{r, echo=FALSE}
 mod_1 <- glm(class ~ cap_diameter + cap_shape + stem_color + season, 
              family = binomial(link = "logit"),
@@ -398,7 +399,7 @@ a12 = anova(mod_sin_season, mod_1, test = "LRT") # p-v = 0.05, el beta asoc. a s
 
 Las variables significativas de forma marginal son el diámetro del sombrero, la forma del sombrero, el color del tallo y la temporada del año, por lo que se plantea un modelo con todas ellas incluidas y se quitan todas las que no aporten significativamente a la explicación.
 
-```{=tex}
+
 \begin{table}[H]
 \begin{center}
 \begin{tabular}{|l|l|l|l|}
@@ -413,7 +414,7 @@ Sin temporada & 3  & `r round(a12$Deviance[2],3)`    & \textcolor{red}{`r round(
 \label{table:1}
 \end{center}
 \end{table}
-```
+
 ```{r, echo=FALSE}
 
 mod_3 <- glm(class ~ cap_diameter + cap_shape + stem_color + gill_attachment, 
@@ -449,7 +450,7 @@ a16 = anova(mod_sin_season, mod_6, test = "LRT")
 
 Se elimina la temporada del modelo y se prueba incluir las demás variables explicativas que no se incluyeron al principio.
 
-```{=tex}
+
 \begin{table}[H]
 \begin{center}
 \begin{tabular}{|l|l|l|l|}
@@ -464,7 +465,7 @@ Añadir ancho del tallo & 1  & `r round(a16$Deviance[2],3)`    & \textcolor{red}
 \label{table:1}
 \end{center}
 \end{table}
-```
+
 ```{r, echo=FALSE}
 
 mod_7 <- glm(class ~ cap_diameter * cap_shape + stem_color, 
@@ -492,7 +493,7 @@ mod_sin_season_loglog <- glm(class ~ cap_diameter + cap_shape + stem_color,
 
 No se incorpora ninguna variable nueva, por lo que se pasa a probar las interacciones.
 
-```{=tex}
+
 \begin{table}[H]
 \begin{center}
 \begin{tabular}{|l|l|l|l|}
@@ -506,10 +507,10 @@ Forma del sombrero x Color de las láminas    & 4  & `r round(a19$Deviance[2],3)
 \label{table:1}
 \end{center}
 \end{table}
-```
+
 Ninguna interacción es significativa por lo que no se incluyen en el modelo.
 
-Una vez elegidas las variables, se prueba si se debe añadir el Diámetro del sombrero del hongo de forma lineal o como un factor. Se divide la variable en cuatro grupos de tamaño parecido y se crean dos variables con ellos, una ordinal y la otra categórica. Se definen dos nuevos modelos con cada una de estas nuevas variables (sin incluir la forma original) y se comparan las deviance de los modelos. No se rechaza (**p-value:0.20**) la hipótesis nula de no linealidad, por lo que se mantiene en el modelo la variable en su forma continua.
+Una vez elegidas las variables, se prueba si se debe añadir el Diámetro del sombrero del hongo de forma lineal o como un factor. Se divide la variable en cuatro grupos de tamaño parecido y se crean dos variables con ellos, una ordinal y la otra categórica. Se definen dos nuevos modelos con cada una de estas nuevas variables (sin incluir la forma original) y se comparan las deviance de los modelos. No se rechaza (**p-value:0.20**) la hipótesis nula de no linealidad, por lo que se mantiene en el modelo la variable en forma lineal y continua.
 
 ```{r, echo=FALSE}
 # De momento nos quedamos con "mod_sin_season" que tiene enlace logit
@@ -765,41 +766,48 @@ Pese a que la probabilidad asociada a la variable *temporada* fue mayor que el n
 Por ello, se ajusta un modelo que incluya esa variable y se compara su capacidad predictiva con la del modelo que no la incluye a través de las gráficas de las curvas ROC y las predicciones obtenidas con el punto de corte óptimo.
 
 
-```{r, message=FALSE, echo=FALSE, warning=FALSE, fig.height=3, fig.width=5}
+```{r, message=FALSE, echo=FALSE, warning=FALSE, fig.cap="Comparación de curvas ROC"}
 
 # El modelo con las cuatro variables ya fue ajustado al inicio, es el "mod_1"
 
 
 # Curva para "mod_sin_season"
 par(pty = "s") # Para que grafique sólo en el (0;1)
-ggroc(roc(muestra$class, fitted(mod_sin_season)), col = "olivedrab2") + 
+roc1 =ggroc(roc(muestra$class, fitted(mod_sin_season)), col = "olivedrab2") + 
   geom_abline(slope = 1, intercept = 1, alpha = .5) + 
   geom_text(aes(x = .35, y = .5, label = "AUC: 0.719"), size = 2.5, color = "steelblue") +
   geom_point(aes(x = 0.619, y = 0.703)) +
   geom_text(aes(x = 0.60, y = .55, label = "0.459 (0.619, 0.703)"), size = 2.5, color = "steelblue") +
-  labs(x = "1 - Especificidad", y = "Sensibilidad", title = "Curva ROC")
+  labs(x = "1 - Especificidad", y = "Sensibilidad", title = "Curva ROC sin la variable")
 
 
 # Curva para "mod_1"
 par(pty = "s") # Para que grafique sólo en el (0;1)
-ggroc(roc(muestra$class, fitted(mod_1)), col = "olivedrab2") + 
+roc2 = ggroc(roc(muestra$class, fitted(mod_1)), col = "olivedrab2") + 
   geom_abline(slope = 1, intercept = 1, alpha = .5) + 
   geom_text(aes(x = .35, y = .5, label = "AUC: 0.731"), size = 2.5, color = "steelblue") +
   geom_point(aes(x = 0.669, y = 0.694)) +
   geom_text(aes(x = 0.60, y = .55, label = "0.439 (0.669, 0.694)"), size = 2.5, color = "steelblue") +
-  labs(x = "1 - Especificidad", y = "Sensibilidad", title = "Curva ROC")
+  labs(x = "1 - Especificidad", y = "Sensibilidad", title = "Curva ROC con la variable")
 
+grid.arrange(roc1, roc2, nrow = 1)
 
 ```
 
-Se tienen entonces las siguientes medidas:
-\begin{table}[]
-\begin{tabular}{lccccc}
+Se tienen entonces las siguientes Métricas:
+
+
+
+\begin{table}[H]
+\begin{center}
+\begin{tabular}{|lccccc|}
 \hline
-\multicolumn{1}{c}{Modelo} & Corte & AUC   & \begin{tabular}[c]{@{}c@{}}Presición \\ Global\end{tabular} & Especificidad & Sensibilidad \\ \hline
+\multicolumn{1}{|c}{Modelo} & Corte & AUC   & \makecell{Presición \\ Global} & Especificidad & Sensibilidad \\ \hline
 Sin "Temporada"            & 0.459 & 0.719 & 0.656                                                       & 0.619         & 0.703        \\ \hline
 Con "Temporada"            & 0.439 & 0.731 & 0.668                                                       & 0.712         & 0.613        \\ \hline
 \end{tabular}
+\end{center}\caption{Métricas de Evaluación para ambos modelos}
+\label{table:1}
 \end{table}
 
 ```{r, echo=FALSE}
@@ -820,29 +828,36 @@ asd_2 = caret::confusionMatrix(data = y_pred_2, reference = y_obs_2, positive = 
 
 Bajo el punto de corte del modelo sin la variable (0.459), la matriz de confusión es la siguiente:
 
-```{=tex}
+
 \begin{table}[H]
+\begin{center}
 \begin{tabular}{|ll|ll|}
 \hline
 \multicolumn{2}{|l|}{}            & \multicolumn{2}{c|}{Observado}                    \\ \hline
 \multicolumn{2}{|l|}{Predicho}  & \multicolumn{1}{l|}{Venenosos} & Comestibles \\ \hline
 \multicolumn{2}{|l|}{Venenosos}   & \multicolumn{1}{l|}{`r asd[[2]][1]`}        & `r asd[[2]][3]`          \\ \hline
 \multicolumn{2}{|l|}{Comestibles} & \multicolumn{1}{l|}{`r asd[[2]][2]` }        & `r asd[[2]][4]`          \\ \hline
-\end{tabular}
+\end{tabular}\caption{Matriz de confusión sin temporada}
+\label{table:1}
+\end{center}
 \end{table}
-```
+
 
 
 Mientras que bajo el punto de corte del modelo con la variable (0.439), la matriz de confusión es la siguiente:
 
-```{=tex}
+
 \begin{table}[H]
+\begin{center}
 \begin{tabular}{|ll|ll|}
 \hline
 \multicolumn{2}{|l|}{}            & \multicolumn{2}{c|}{Observado}                    \\ \hline
 \multicolumn{2}{|l|}{Predicho}  & \multicolumn{1}{l|}{Venenosos} & Comestibles \\ \hline
 \multicolumn{2}{|l|}{Venenosos}   & \multicolumn{1}{l|}{`r asd_2[[2]][1]`}        & `r asd_2[[2]][3]`          \\ \hline
 \multicolumn{2}{|l|}{Comestibles} & \multicolumn{1}{l|}{`r asd_2[[2]][2]` }        & `r asd_2[[2]][4]`          \\ \hline
-\end{tabular}
+\end{tabular}\caption{Matriz de confusión con temporada}
+\label{table:1}
+\end{center}
 \end{table}
-```
+
+Como el objetivo del trabajo es encontrar un modelo que encuentre que hongos no son los venenosos, se elige el modelo con la variable temporada incluida, ya que tiene una precisión global y una especificidad mayor.
