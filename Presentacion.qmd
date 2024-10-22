@@ -794,7 +794,7 @@ grid.arrange(roc1, roc2, nrow = 1)
 
 ```
 
-Se tienen entonces las siguientes Métricas:
+Se tienen entonces las siguientes métricas:
 
 
 
@@ -806,7 +806,7 @@ Se tienen entonces las siguientes Métricas:
 Sin "Temporada"            & 0.459 & 0.719 & 0.656                                                       & 0.619         & 0.703        \\ \hline
 Con "Temporada"            & 0.439 & 0.731 & 0.668                                                       & 0.712         & 0.613        \\ \hline
 \end{tabular}
-\end{center}\caption{Métricas de Evaluación para ambos modelos}
+\end{center}\caption{Métricas de evaluación para ambos modelos}
 \label{table:1}
 \end{table}
 
